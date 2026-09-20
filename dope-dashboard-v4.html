@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dope Restaurant — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --sidebar: #0c1117;
+    --panel: #10151d;
+    --panel-border: #1e2733;
+    --accent: #00c2b8;
+    --accent-soft: rgba(0, 194, 184, 0.12);
+    --text: #e8edf2;
+    --text-dim: #7c8a9a;
+    --text-faint: #4a5568;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --green: #22c55e;
+    --violet: #8b5cf6;
+    --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--panel-border);
+    padding: 20px 14px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .sb-brand { display: flex; align-items: center; gap: 10px; padding: 4px 6px 20px; }
+  .sb-brand-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), #007a73);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .sb-brand h1 { font-size: 14px; font-weight: 700; }
+  .sb-brand p { font-size: 10.5px; color: var(--text-dim); }
+
+  .sb-nav { display: flex; flex-direction: column; gap: 2px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: default;
+  }
+  .sb-item .ic { width: 16px; text-align: center; opacity: 0.85; }
+  .sb-item.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .sb-footer { margin-top: auto; font-size: 11px; color: var(--text-faint); padding: 10px 6px; }
+
+  /* Main */
+  .main { flex: 1; min-width: 0; padding: 18px 24px; }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1; max-width: 380px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 10px; padding: 9px 14px;
+    color: var(--text-faint); font-size: 13px;
+  }
+  .top-right { display: flex; align-items: center; gap: 14px; }
+  .status-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    padding: 7px 13px; border-radius: 100px; font-size: 12.5px; color: var(--text-dim);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .dot.pulse { animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .owner { display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #2a3644; }
+  .owner .name { font-size: 12.5px; font-weight: 600; }
+  .owner .role { font-size: 10.5px; color: var(--text-dim); }
+
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px; margin-bottom: 16px;
+  }
+  .kpi {
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 14px; padding: 17px 19px;
+  }
+  .kpi-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .kpi-icon {
+    width: 32px; height: 32px; background: var(--accent-soft); border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .kpi-label { font-size: 12px; color: var(--text-dim); }
+  .kpi-value { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .kpi-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  .row-3 { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 1100px) { .row-3 { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .row-2 { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; padding: 17px 19px; }
+  .panel-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .panel-title .tag { font-size: 11px; color: var(--text-dim); font-weight: 400; background: #1a2230; padding: 3px 9px; border-radius: 7px; }
+
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .donut-canvas-box { position: relative; width: 140px; height: 140px; }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .donut-center .num { font-size: 26px; font-weight: 700; }
+  .donut-center .lbl { font-size: 10.5px; color: var(--text-dim); }
+  .legend { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .legend-swatch { width: 8px; height: 8px; border-radius: 3px; }
+  .legend-count { color: var(--text-dim); margin-left: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; padding: 8px 9px; color: var(--text-dim); font-weight: 500; font-size: 11px; border-bottom: 1px solid var(--panel-border); }
+  td { padding: 10px 9px; border-bottom: 1px solid var(--panel-border); }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 100px; font-size: 10.5px; font-weight: 500; }
+  .badge-pending { background: rgba(139,92,246,0.15); color: var(--violet); }
+  .badge-preparing { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .badge-ready { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .badge-completed { background: rgba(34,197,94,0.15); color: var(--green); }
+  .type-tag { display: inline-block; padding: 3px 9px; border-radius: 7px; font-size: 10.5px; background: #1a2230; color: var(--text-dim); }
+  .items-cell { color: var(--text-dim); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .amt { font-weight: 600; }
+  .table-scroll { overflow-x: auto; }
+
+  .top-item-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--panel-border); }
+  .top-item-row:last-child { border-bottom: none; }
+  .rank { width: 22px; height: 22px; border-radius: 7px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .top-item-name { font-size: 12.5px; flex: 1; }
+  .top-item-count { font-size: 12.5px; font-weight: 600; color: var(--text-dim); }
+
+  .empty { color: var(--text-dim); font-size: 13px; padding: 20px 0; text-align: center; }
+  .err-box {
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5; padding: 14px 16px; border-radius: 10px; font-size: 13px;
+    margin-bottom: 16px; line-height: 1.5;
+  }
+  .err-box code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; }
+
+  /* Login gate */
+  #gateOverlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .gate-card {
+    width: 100%; max-width: 360px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 18px; padding: 32px 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .gate-icon {
+    width: 52px; height: 52px; margin: 0 auto 18px;
+    background: linear-gradient(135deg, var(--accent), #007a73);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .gate-title { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 3px; }
+  .gate-sub { text-align: center; font-size: 12.5px; color: var(--text-dim); margin-bottom: 26px; }
+  .gate-field { margin-bottom: 14px; }
+  .gate-field label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+  .gate-field input {
+    width: 100%; background: #0c1117; border: 1px solid var(--panel-border);
+    border-radius: 10px; padding: 11px 13px; color: var(--text); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .gate-field input:focus { border-color: var(--accent); }
+  .gate-btn {
+    width: 100%; margin-top: 8px;
+    background: var(--accent); color: #04211f; font-weight: 700; font-size: 14px;
+    border: none; border-radius: 10px; padding: 12px; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .gate-btn:hover { opacity: 0.9; }
+  .gate-error {
+    color: #fca5a5; font-size: 12.5px; text-align: center; margin-top: 12px;
+    min-height: 16px;
+  }
+  #appContent { display: none; }
+
+  /* Sidebar clickable */
+  .sb-item { cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .sb-item:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--text); }
+  .sb-soon { margin-left: auto; font-size: 9px; color: var(--text-faint); background: #1a2230; padding: 2px 6px; border-radius: 5px; }
+
+  /* Notification bell */
+  .bell-wrap { position: relative; cursor: pointer; }
+  .bell-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .bell-badge {
+    position: absolute; top: -5px; right: -5px;
+    background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+    min-width: 17px; height: 17px; border-radius: 100px;
+    display: flex; align-items: center; justify-content: center; padding: 0 3px;
+    border: 2px solid var(--bg);
+  }
+
+  /* Orders page */
+  .filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-tab {
+    padding: 7px 14px; border-radius: 100px; font-size: 12.5px; cursor: pointer;
+    background: var(--panel); border: 1px solid var(--panel-border); color: var(--text-dim);
+  }
+  .filter-tab.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .order-row { cursor: pointer; }
+  .order-row:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Modal */
+  #orderModalOverlay {
+    display: none; position: fixed; inset: 0; z-index: 998;
+    background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 16px;
+  }
+  .order-modal {
+    width: 100%; max-width: 440px; max-height: 85vh; overflow-y: auto;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 16px; padding: 22px;
+  }
+  .modal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+  .modal-order-id { font-size: 17px; font-weight: 700; }
+  .modal-close { cursor: pointer; color: var(--text-dim); font-size: 20px; line-height: 1; }
+  .modal-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; }
+  .modal-row:last-of-type { border-bottom: none; }
+  .modal-row .k { color: var(--text-dim); }
+  .modal-row .v { text-align: right; max-width: 62%; }
+  .modal-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .action-btn {
+    flex: 1; min-width: 100px; padding: 10px; border-radius: 9px; border: none;
+    font-size: 12.5px; font-weight: 600; cursor: pointer; color: #fff;
+  }
+  .action-btn.preparing { background: var(--blue); }
+  .action-btn.ready { background: var(--amber); color: #1a1200; }
+  .action-btn.completed { background: var(--green); color: #04210f; }
+  .action-btn.cancelled { background: transparent; border: 1px solid var(--red); color: var(--red); }
+  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .modal-status-msg { text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 10px; min-height: 14px; }
+  .badge-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-out-for-delivery { background: rgba(6,182,212,0.15); color: #06b6d4; }
+
+  /* Redesign additions */
+  .view-all-link { font-size: 12px; color: var(--accent); font-weight: 500; cursor: pointer; }
+  .view-all-link:hover { text-decoration: underline; }
+  .right-col { display: flex; flex-direction: column; gap: 14px; }
+  .date-filter-select {
+    background: #0c1117; border: 1px solid var(--panel-border); color: var(--text-dim);
+    font-size: 11.5px; border-radius: 7px; padding: 5px 8px; outline: none; cursor: pointer;
+  }
+  .date-input-inline {
+    background: #0c1117; border: 1px solid var(--panel-border); color: var(--text);
+    font-size: 12px; border-radius: 7px; padding: 6px 9px; outline: none; margin-bottom: 12px; width: 100%;
+  }
+  .orders-page-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .orders-page-controls .filter-tabs { margin-bottom: 0; }
+  .date-filter-wrap { display: flex; align-items: center; gap: 8px; }
+  .date-filter-wrap .date-input-inline { margin-bottom: 0; width: auto; }
+
+  /* Kanban board */
+  .kanban-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .kanban-toolbar-right { display: flex; align-items: center; gap: 10px; }
+  .kanban-stats { display: flex; gap: 22px; }
+  .kstat { display: flex; flex-direction: column; }
+  .kstat-num { font-size: 19px; font-weight: 700; }
+  .kstat-lbl { font-size: 11px; color: var(--text-dim); }
+  .cancelled-toggle {
+    font-size: 12px; color: var(--text-dim); cursor: pointer;
+    background: var(--panel); border: 1px solid var(--panel-border);
+    padding: 7px 13px; border-radius: 100px;
+  }
+  .cancelled-toggle.active { color: var(--red); border-color: var(--red); }
+
+  .kanban-board { display: flex; gap: 14px; overflow-x: auto; align-items: flex-start; padding-bottom: 8px; }
+  .kanban-col {
+    flex: 0 0 250px; width: 250px;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 12px; display: flex; flex-direction: column;
+    max-height: calc(100vh - 220px);
+  }
+  .kanban-col-header {
+    display: flex; align-items: center; gap: 7px;
+    padding-bottom: 10px; margin-bottom: 10px; border-bottom: 2px solid;
+    font-weight: 700; font-size: 12.5px;
+  }
+  .kc-count {
+    margin-left: auto; background: rgba(255,255,255,0.08); color: var(--text);
+    padding: 1px 8px; border-radius: 100px; font-size: 11px; font-weight: 600;
+  }
+  .kanban-cards { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 60px; }
+  .kan-empty { text-align: center; color: var(--text-faint); font-size: 11.5px; padding: 26px 8px; }
+
+  .kan-card {
+    background: #0c1117; border: 1px solid var(--panel-border); border-left: 3px solid var(--panel-border);
+    border-radius: 11px; padding: 11px; cursor: pointer;
+  }
+  .kan-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .kan-order-id { font-weight: 700; font-size: 12.5px; }
+  .kan-type-tag { font-size: 9.5px; padding: 2px 7px; border-radius: 6px; background: #1a2230; color: var(--text-dim); }
+  .kan-customer { font-size: 12px; margin-bottom: 3px; }
+  .kan-elapsed { font-size: 10.5px; color: var(--text-dim); margin-bottom: 8px; }
+  .kan-items { font-size: 11px; color: var(--text-dim); margin-bottom: 9px; line-height: 1.5; }
+  .kan-total { font-size: 12.5px; font-weight: 700; margin-bottom: 9px; }
+  .kan-actions { display: flex; gap: 6px; }
+  .kan-btn {
+    flex: 1; padding: 8px; border-radius: 8px; border: none;
+    font-size: 11px; font-weight: 600; cursor: pointer; color: #fff;
+  }
+  .kan-btn.cancel { flex: 0 0 auto; width: 32px; background: transparent; border: 1px solid var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-icon">🔒</div>
+    <div class="gate-title">The Dope Restaurant</div>
+    <div class="gate-sub">Owner access only</div>
+    <form id="gateForm">
+      <div class="gate-field">
+        <label>Name</label>
+        <input type="text" id="gateName" autocomplete="username" required>
+      </div>
+      <div class="gate-field">
+        <label>Password</label>
+        <input type="password" id="gatePass" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="gate-btn">Unlock Dashboard</button>
+      <div class="gate-error" id="gateError"></div>
+    </form>
+  </div>
+</div>
+
+<div id="appContent">
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-icon">🍕</div>
+    <div><h1>Dope Restaurant</h1><p>Owner Panel</p></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-item active" id="sbDashboard" onclick="showPage('dashboard')"><span class="ic">▦</span> Dashboard</div>
+    <div class="sb-item" id="sbOrders" onclick="showPage('orders')"><span class="ic">▤</span> Orders</div>
+    <div class="sb-item"><span class="ic">◫</span> Menu <span class="sb-soon">Soon</span></div>
+    <div class="sb-item"><span class="ic">◔</span> Cash Closing <span class="sb-soon">Soon</span></div>
+    <div class="sb-item"><span class="ic">▥</span> Inventory <span class="sb-soon">Soon</span></div>
+    <div class="sb-item"><span class="ic">◎</span> Customers <span class="sb-soon">Soon</span></div>
+    <div class="sb-item"><span class="ic">▧</span> Reports <span class="sb-soon">Soon</span></div>
+    <div class="sb-item"><span class="ic">⚙</span> Settings <span class="sb-soon">Soon</span></div>
+  </div>
+  <div class="sb-footer">The Dope Restaurant<br>Powered by n8n</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="search-box">🔍 Search anything…</div>
+    <div class="top-right">
+      <div class="bell-wrap" onclick="showPage('orders')">
+        <div class="bell-btn">🔔</div>
+        <div class="bell-badge" id="bellBadge" style="display:none;">0</div>
+      </div>
+      <div class="status-pill"><span class="dot pulse" id="statusDot"></span><span id="statusText">Connecting…</span></div>
+      <div class="owner">
+        <div class="avatar"></div>
+        <div><div class="name">Owner</div><div class="role">Administrator</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorBox"></div>
+
+  <div id="dashboardPage">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Orders</div></div>
+      <div class="kpi-value" id="kpiTotalOrders">—</div>
+      <div class="kpi-sub">All-time</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-icon">🛍️</div><div class="kpi-label">Today's Orders</div></div>
+      <div class="kpi-value" id="kpiOrders">—</div>
+      <div class="kpi-sub">Orders placed today</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-icon">💬</div><div class="kpi-label">WhatsApp Orders</div></div>
+      <div class="kpi-value" id="kpiWhatsapp">—</div>
+      <div class="kpi-sub" id="kpiWhatsappSub">Today — · All —</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-icon">🍽️</div><div class="kpi-label">Dine-in Orders</div></div>
+      <div class="kpi-value" id="kpiDinein">—</div>
+      <div class="kpi-sub" id="kpiDineinSub">Today — · All —</div>
+    </div>
+  </div>
+
+  <div class="row-2">
+    <div class="panel">
+      <div class="panel-title">
+        <span>Recent Orders <span class="tag" id="ordersTag">—</span></span>
+        <span class="view-all-link" onclick="showPage('orders')">View All Orders →</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Amount</th><th>Type</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="panel">
+        <div class="panel-title">
+          <span>Order Status</span>
+          <select class="date-filter-select" id="statusRangeSelect" onchange="onStatusRangeChange()">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7">Last 7 Days</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Date</option>
+          </select>
+        </div>
+        <input type="date" id="statusCustomDate" class="date-input-inline" style="display:none;">
+        <div class="donut-wrap">
+          <div class="donut-canvas-box">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center"><div class="num" id="donutTotal">0</div><div class="lbl">Total</div></div>
+          </div>
+          <div class="legend" id="legendBox"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>Top Selling Items</span>
+          <select class="date-filter-select" id="topItemsRangeSelect" onchange="onTopItemsRangeChange()">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7">Last 7 Days</option>
+            <option value="month">This Month</option>
+            <option value="custom">Custom Date</option>
+          </select>
+        </div>
+        <input type="date" id="topItemsCustomDate" class="date-input-inline" style="display:none;">
+        <div id="topItemsBox"></div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /#dashboardPage -->
+
+  <div id="ordersPage" style="display:none;">
+    <div class="kanban-toolbar">
+      <div class="kanban-stats">
+        <div class="kstat"><span class="kstat-num" id="kanTotal">0</span><span class="kstat-lbl">Orders</span></div>
+        <div class="kstat"><span class="kstat-num" id="kanRevenue">Rs. 0</span><span class="kstat-lbl">Revenue</span></div>
+        <div class="kstat"><span class="kstat-num" id="kanAvg">Rs. 0</span><span class="kstat-lbl">Avg Ticket</span></div>
+      </div>
+      <div class="kanban-toolbar-right">
+        <div class="date-filter-wrap">
+          <select class="date-filter-select" id="ordersRangeSelect">
+            <option value="today" selected>Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7">Last 7 Days</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+            <option value="custom">Custom Date</option>
+          </select>
+          <input type="date" id="ordersCustomDate" class="date-input-inline" style="display:none;">
+        </div>
+        <div class="cancelled-toggle" id="cancelledToggle" onclick="toggleCancelledStrip()">Cancelled <span id="cancelledCount">0</span></div>
+      </div>
+    </div>
+
+    <div class="kanban-board" id="kanbanBoard">
+      <div class="kanban-col" data-status="Pending">
+        <div class="kanban-col-header" style="border-color:var(--violet); color:var(--violet);"><span class="kc-icon">🕐</span><span class="kc-title">Pending</span><span class="kc-count" id="countPending">0</span></div>
+        <div class="kanban-cards" id="colPending"></div>
+      </div>
+      <div class="kanban-col" data-status="Preparing">
+        <div class="kanban-col-header" style="border-color:var(--blue); color:var(--blue);"><span class="kc-icon">🍳</span><span class="kc-title">Preparing</span><span class="kc-count" id="countPreparing">0</span></div>
+        <div class="kanban-cards" id="colPreparing"></div>
+      </div>
+      <div class="kanban-col" data-status="Ready">
+        <div class="kanban-col-header" style="border-color:var(--amber); color:var(--amber);"><span class="kc-icon">🛎️</span><span class="kc-title">Ready</span><span class="kc-count" id="countReady">0</span></div>
+        <div class="kanban-cards" id="colReady"></div>
+      </div>
+      <div class="kanban-col" data-status="Out for Delivery">
+        <div class="kanban-col-header" style="border-color:#06b6d4; color:#06b6d4;"><span class="kc-icon">🛵</span><span class="kc-title">Out for Delivery</span><span class="kc-count" id="countOutForDelivery">0</span></div>
+        <div class="kanban-cards" id="colOutForDelivery"></div>
+      </div>
+      <div class="kanban-col" data-status="Completed">
+        <div class="kanban-col-header" style="border-color:var(--green); color:var(--green);"><span class="kc-icon">✅</span><span class="kc-title">Completed</span><span class="kc-count" id="countCompleted">0</span></div>
+        <div class="kanban-cards" id="colCompleted"></div>
+      </div>
+      <div class="kanban-col" id="cancelledCol" style="display:none;" data-status="Cancelled">
+        <div class="kanban-col-header" style="border-color:var(--red); color:var(--red);"><span class="kc-icon">🚫</span><span class="kc-title">Cancelled</span><span class="kc-count" id="countCancelled">0</span></div>
+        <div class="kanban-cards" id="colCancelled"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /#appContent -->
+
+<div id="orderModalOverlay">
+  <div class="order-modal" id="orderModalBox"></div>
+</div>
+
+<script>
+const SHEET_ID = "1BWwx1h_lQZkIL5xbA7DDVp6u_2uHSKyWpbOfw_Vf4fM";
+const ORDERS_GID = "618526932";
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${ORDERS_GID}`;
+const UPDATE_ENDPOINT = "https://aslamshah.app.n8n.cloud/webhook/update-order-status";
+const REFRESH_MS = 20000;
+
+let allOrders = [];
+let currentFilter = "All";
+
+// ---- Login gate ----
+const GATE_NAME = "artist";
+const GATE_PASS = "artist8888";
+
+function showApp() {
+  document.getElementById("gateOverlay").style.display = "none";
+  document.getElementById("appContent").style.display = "flex";
+  fetchData();
+  setInterval(fetchData, REFRESH_MS);
+}
+
+document.getElementById("gateForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  const name = document.getElementById("gateName").value.trim();
+  const pass = document.getElementById("gatePass").value.trim();
+  if (name === GATE_NAME && pass === GATE_PASS) {
+    localStorage.setItem("dope_unlock_date", new Date().toDateString());
+    showApp();
+  } else {
+    document.getElementById("gateError").textContent = "Galat name ya password — dobara try karo.";
+  }
+});
+
+if (localStorage.getItem("dope_unlock_date") === new Date().toDateString()) {
+  showApp();
+}
+
+const STATUS_COLORS = { Completed: "#22c55e", Preparing: "#3b82f6", Ready: "#f59e0b", Pending: "#8b5cf6", Cancelled: "#ef4444", "Out for Delivery": "#06b6d4" };
+let donutChart = null;
+let statusRange = "today";
+let topItemsRange = "today";
+let ordersRange = "today";
+let showCancelled = false;
+
+function fmtMoney(n) { return "Rs. " + (Number(n) || 0).toLocaleString("en-PK"); }
+function badgeClass(status) { return "badge-" + (status || "pending").toLowerCase().replace(/\s+/g, "-"); }
+
+// Pakistan "now" (UTC+5), read back via getUTC* fields
+function pkNow() { return new Date(Date.now() + 5 * 60 * 60 * 1000); }
+// Same wall-clock numbers, but as a plain Date usable for arithmetic against parseOrderTime()'s output
+function pkNowLocal() {
+  const p = pkNow();
+  return new Date(p.getUTCFullYear(), p.getUTCMonth(), p.getUTCDate(), p.getUTCHours(), p.getUTCMinutes(), p.getUTCSeconds());
+}
+function elapsedText(orderDate) {
+  if (!orderDate) return "—";
+  const mins = Math.max(0, Math.round((pkNowLocal() - orderDate) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + "m ago";
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return h + "h " + m + "m ago";
+}
+function parseItemsList(itemsStr) {
+  if (!itemsStr) return [];
+  return itemsStr.split(',').map(part => {
+    const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+    return m ? { qty: m[1], name: m[2].trim() } : { qty: "", name: part.trim() };
+  }).filter(x => x.name);
+}
+
+function inRange(orderDate, rangeKey, customDateStr) {
+  if (!orderDate) return false;
+  const now = pkNow();
+  const ny = now.getUTCFullYear(), nm = now.getUTCMonth(), nd = now.getUTCDate();
+  const oy = orderDate.getFullYear(), om = orderDate.getMonth(), od = orderDate.getDate();
+  const dayMs = 86400000;
+  const todayMid = new Date(ny, nm, nd).getTime();
+  const orderMid = new Date(oy, om, od).getTime();
+
+  switch (rangeKey) {
+    case "today":
+      return oy === ny && om === nm && od === nd;
+    case "yesterday": {
+      const y = new Date(todayMid - dayMs);
+      return oy === y.getFullYear() && om === y.getMonth() && od === y.getDate();
+    }
+    case "last7":
+      return (todayMid - orderMid) >= 0 && (todayMid - orderMid) <= 6 * dayMs;
+    case "month":
+      return oy === ny && om === nm;
+    case "custom": {
+      if (!customDateStr) return false;
+      const [cy, cm, cd] = customDateStr.split("-").map(Number);
+      return oy === cy && om === (cm - 1) && od === cd;
+    }
+    default:
+      return true; // "all"
+  }
+}
+
+function render(data) {
+  document.getElementById("kpiTotalOrders").textContent = data.total_orders ?? 0;
+  document.getElementById("kpiOrders").textContent = data.orders_count ?? 0;
+  document.getElementById("kpiWhatsapp").textContent = data.whatsapp_today ?? 0;
+  document.getElementById("kpiWhatsappSub").textContent = `Today ${data.whatsapp_today ?? 0} · All ${data.whatsapp_all ?? 0}`;
+  document.getElementById("kpiDinein").textContent = data.dinein_today ?? 0;
+  document.getElementById("kpiDineinSub").textContent = `Today ${data.dinein_today ?? 0} · All ${data.dinein_all ?? 0}`;
+
+  const tbody = document.getElementById("ordersBody");
+  tbody.innerHTML = "";
+  const orders = data.recent_orders || [];
+  document.getElementById("ordersTag").textContent = orders.length + " orders";
+  if (orders.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No orders yet</td></tr>';
+  } else {
+    orders.forEach(o => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>#${o.orderId ?? "—"}</td>
+        <td>${o.customer ?? "—"}</td>
+        <td class="items-cell" title="${(o.items || "").replace(/"/g,'&quot;')}">${o.items ?? "—"}</td>
+        <td class="amt">${fmtMoney(o.amount)}</td>
+        <td><span class="type-tag">${o.type ?? "—"}</span></td>
+        <td><span class="badge ${badgeClass(o.status)}">${o.status ?? "Pending"}</span></td>
+        <td style="color:var(--text-dim); font-size:11.5px;">${o.time ?? "—"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+}
+
+function renderOrderStatusPanel() {
+  const customDate = document.getElementById("statusCustomDate").value;
+  const filtered = allOrders.filter(o => inRange(parseOrderTime(o.Time), statusRange, customDate));
+
+  const statusCounts = { Completed: 0, Preparing: 0, Ready: 0, Pending: 0, Cancelled: 0, "Out for Delivery": 0 };
+  filtered.forEach(o => {
+    const s = (o.Status || "Pending").toString().trim();
+    if (statusCounts.hasOwnProperty(s)) statusCounts[s]++;
+  });
+
+  const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+  document.getElementById("donutTotal").textContent = total;
+  const labels = Object.keys(statusCounts);
+  const values = Object.values(statusCounts);
+  const colors = labels.map(l => STATUS_COLORS[l] || "#666");
+
+  if (donutChart) {
+    donutChart.data.datasets[0].data = values;
+    donutChart.update();
+  } else {
+    const ctx = document.getElementById("donutChart").getContext("2d");
+    donutChart = new Chart(ctx, {
+      type: "doughnut",
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+      options: { cutout: "72%", plugins: { legend: { display: false }, tooltip: { enabled: true } } }
+    });
+  }
+
+  const legendBox = document.getElementById("legendBox");
+  legendBox.innerHTML = "";
+  labels.forEach(l => {
+    const pct = total ? Math.round((statusCounts[l] / total) * 100) : 0;
+    const row = document.createElement("div");
+    row.className = "legend-row";
+    row.innerHTML = `<span class="legend-swatch" style="background:${STATUS_COLORS[l] || '#666'}"></span><span>${l}</span><span class="legend-count">${statusCounts[l]} (${pct}%)</span>`;
+    legendBox.appendChild(row);
+  });
+}
+
+function renderTopItemsPanel() {
+  const customDate = document.getElementById("topItemsCustomDate").value;
+  const filtered = allOrders.filter(o => inRange(parseOrderTime(o.Time), topItemsRange, customDate));
+
+  const itemCounts = {};
+  filtered.forEach(o => {
+    if (!o.Items) return;
+    o.Items.split(',').forEach(part => {
+      const match = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+      if (match) {
+        const qty = parseInt(match[1]);
+        const name = match[2].trim();
+        itemCounts[name] = (itemCounts[name] || 0) + qty;
+      }
+    });
+  });
+
+  const topItems = Object.entries(itemCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count }));
+
+  const topBox = document.getElementById("topItemsBox");
+  if (topItems.length === 0) {
+    topBox.innerHTML = '<div class="empty">No item data for this range</div>';
+  } else {
+    topBox.innerHTML = "";
+    topItems.forEach((it, i) => {
+      const row = document.createElement("div");
+      row.className = "top-item-row";
+      row.innerHTML = `<div class="rank">${i + 1}</div><div class="top-item-name">${it.name}</div><div class="top-item-count">${it.count} sold</div>`;
+      topBox.appendChild(row);
+    });
+  }
+}
+
+function onStatusRangeChange() {
+  statusRange = document.getElementById("statusRangeSelect").value;
+  document.getElementById("statusCustomDate").style.display = statusRange === "custom" ? "block" : "none";
+  renderOrderStatusPanel();
+}
+
+function onTopItemsRangeChange() {
+  topItemsRange = document.getElementById("topItemsRangeSelect").value;
+  document.getElementById("topItemsCustomDate").style.display = topItemsRange === "custom" ? "block" : "none";
+  renderTopItemsPanel();
+}
+
+document.getElementById("statusCustomDate").addEventListener("change", renderOrderStatusPanel);
+document.getElementById("topItemsCustomDate").addEventListener("change", renderTopItemsPanel);
+
+function setStatus(ok, msg) {
+  document.getElementById("statusDot").style.background = ok ? "#22c55e" : "#ef4444";
+  document.getElementById("statusText").textContent = msg;
+}
+
+// Custom parser for "DD/MM/YYYY, H:MM:SS AM/PM" format (same as Orders sheet)
+function parseOrderTime(timeStr) {
+  if (!timeStr) return null;
+  const [datePart, timePart] = timeStr.split(',').map(s => s.trim());
+  if (!datePart || !timePart) return null;
+  const [day, month, year] = datePart.split('/').map(Number);
+  const match = timePart.match(/(\d+):(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return null;
+  let [, hh, mm, ss, ampm] = match;
+  hh = parseInt(hh);
+  if (ampm.toUpperCase() === 'PM' && hh !== 12) hh += 12;
+  if (ampm.toUpperCase() === 'AM' && hh === 12) hh = 0;
+  return new Date(year, month - 1, day, hh, parseInt(mm), parseInt(ss));
+}
+
+function cellVal(cell) { return cell ? cell.v : null; }
+// Google's gviz endpoint returns date-formatted columns as an internal Date(...) literal in `v`,
+// but keeps the sheet's actual displayed text in `f` — we need the displayed text (f) for Time.
+function timeVal(cell) { return cell ? (cell.f !== undefined && cell.f !== null ? cell.f : cell.v) : null; }
+
+function buildDashboardData(rows) {
+  // Columns: A Time, B Order ID, C Items, D Customer Name, E Phone, F Delivery Method,
+  // G Delivery Address, H Payment, I Status, J Total Amount
+  const orders = rows.map(r => {
+    const c = r.c || [];
+    return {
+      Time: timeVal(c[0]),
+      "Order ID": cellVal(c[1]),
+      Items: cellVal(c[2]),
+      "Customer Name": cellVal(c[3]),
+      "Phone Number": cellVal(c[4]),
+      "Delivery Method": cellVal(c[5]),
+      "Delivery Address": cellVal(c[6]),
+      Payment: cellVal(c[7]),
+      Status: cellVal(c[8]),
+      "Total Amount": cellVal(c[9])
+    };
+  }).filter(o => o["Order ID"]);
+
+  allOrders = orders;
+
+  const nowUTC = new Date();
+  const now = new Date(nowUTC.getTime() + 5 * 60 * 60 * 1000); // Pakistan UTC+5
+
+  const todayOrders = orders.filter(o => {
+    const d = parseOrderTime(o.Time);
+    if (!d) return false;
+    return d.getDate() === now.getUTCDate() &&
+           d.getMonth() === now.getUTCMonth() &&
+           d.getFullYear() === now.getUTCFullYear();
+  });
+
+  const isDinein = o => {
+    const m = (o["Delivery Method"] || "").toLowerCase().trim();
+    return m === "dine-in" || m === "dine in" || m === "dinein";
+  };
+
+  const recentOrders = [...orders]
+    .sort((a, b) => (parseOrderTime(b.Time) || 0) - (parseOrderTime(a.Time) || 0))
+    .slice(0, 5)
+    .map(o => ({
+      orderId: o["Order ID"],
+      customer: o["Customer Name"],
+      items: o.Items,
+      amount: o["Total Amount"],
+      type: o["Delivery Method"],
+      payment: o.Payment,
+      status: o.Status || 'Pending',
+      time: o.Time
+    }));
+
+  return {
+    total_orders: orders.length,
+    orders_count: todayOrders.length,
+    whatsapp_today: todayOrders.length,
+    whatsapp_all: orders.length,
+    dinein_today: todayOrders.filter(isDinein).length,
+    dinein_all: orders.filter(isDinein).length,
+    recent_orders: recentOrders
+  };
+}
+
+async function fetchData() {
+  try {
+    const cacheBust = `&_ts=${Date.now()}`;
+    const res = await fetch(SHEET_URL + cacheBust, { method: "GET", cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error("Sheet response parse nahi hui");
+    const parsed = JSON.parse(match[1]);
+    const rows = (parsed.table && parsed.table.rows) || [];
+    const data = buildDashboardData(rows);
+    render(data);
+    renderOrderStatusPanel();
+    renderTopItemsPanel();
+    renderKanbanBoard();
+    updateBellBadge();
+    setStatus(true, "Live · updated " + new Date().toLocaleTimeString());
+    document.getElementById("errorBox").innerHTML = "";
+  } catch (err) {
+    setStatus(false, "Connection failed");
+    document.getElementById("errorBox").innerHTML = `
+      <div class="err-box">
+        Dashboard data load nahi ho saka. Check karo: Orders sheet "Anyone with the link" pe share hai,
+        aur ye file ek asli browser tab me khuli hai (file download karke Chrome/Safari me open karo).<br>
+        <span style="opacity:0.7">Error: ${err.message}</span>
+      </div>`;
+  }
+}
+
+// ---- Page switching ----
+function showPage(name) {
+  document.getElementById("dashboardPage").style.display = name === "dashboard" ? "block" : "none";
+  document.getElementById("ordersPage").style.display = name === "orders" ? "block" : "none";
+  document.getElementById("sbDashboard").classList.toggle("active", name === "dashboard");
+  document.getElementById("sbOrders").classList.toggle("active", name === "orders");
+  if (name === "orders") renderKanbanBoard();
+}
+
+document.getElementById("ordersRangeSelect").addEventListener("change", function() {
+  ordersRange = this.value;
+  document.getElementById("ordersCustomDate").style.display = ordersRange === "custom" ? "inline-block" : "none";
+  renderKanbanBoard();
+});
+document.getElementById("ordersCustomDate").addEventListener("change", renderKanbanBoard);
+
+function toggleCancelledStrip() {
+  showCancelled = !showCancelled;
+  document.getElementById("cancelledToggle").classList.toggle("active", showCancelled);
+  document.getElementById("cancelledCol").style.display = showCancelled ? "flex" : "none";
+}
+
+function updateBellBadge() {
+  const pendingCount = allOrders.filter(o => (o.Status || "Pending").trim() === "Pending").length;
+  const badge = document.getElementById("bellBadge");
+  if (pendingCount > 0) {
+    badge.style.display = "flex";
+    badge.textContent = pendingCount > 99 ? "99+" : pendingCount;
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+// ---- Kanban board (Orders page) ----
+function nextActionFor(o) {
+  const status = (o.Status || "Pending").trim();
+  const isDelivery = (o["Delivery Method"] || "").toLowerCase() === "delivery";
+  if (status === "Pending") return { label: "Accept · Start Preparing", next: "Preparing", color: "var(--blue)" };
+  if (status === "Preparing") return { label: "Mark Ready", next: "Ready", color: "var(--amber)" };
+  if (status === "Ready") {
+    return isDelivery
+      ? { label: "Out for Delivery", next: "Out for Delivery", color: "#06b6d4" }
+      : { label: "Mark Completed", next: "Completed", color: "var(--green)" };
+  }
+  if (status === "Out for Delivery") return { label: "Mark Completed", next: "Completed", color: "var(--green)" };
+  return null; // Completed / Cancelled — no further action
+}
+
+function renderKanCard(o) {
+  const status = (o.Status || "Pending").trim();
+  const color = STATUS_COLORS[status] || "#666";
+  const items = parseItemsList(o.Items);
+  const itemsHtml = items.slice(0, 3).map(i => `${i.qty ? i.qty + "x " : ""}${i.name}`).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : "");
+  const action = nextActionFor(o);
+  const showCancel = status === "Pending" || status === "Preparing";
+
+  let actionsHtml = "";
+  if (action) {
+    actionsHtml = `<div class="kan-actions">
+      <button class="kan-btn" style="background:${action.color}" onclick="event.stopPropagation(); updateOrderStatus('${o['Order ID']}','${action.next}')">${action.label}</button>
+      ${showCancel ? `<button class="kan-btn cancel" title="Cancel order" onclick="event.stopPropagation(); if(confirm('Order #${o['Order ID']} cancel karna hai?')) updateOrderStatus('${o['Order ID']}','Cancelled')">✕</button>` : ""}
+    </div>`;
+  }
+
+  const div = document.createElement("div");
+  div.className = "kan-card";
+  div.style.borderLeftColor = color;
+  div.onclick = () => openOrderModal(o["Order ID"]);
+  div.innerHTML = `
+    <div class="kan-card-top">
+      <span class="kan-order-id">#${o["Order ID"] ?? "—"}</span>
+      <span class="kan-type-tag">${o["Delivery Method"] ?? "—"}</span>
+    </div>
+    <div class="kan-customer">${o["Customer Name"] ?? "—"}</div>
+    <div class="kan-elapsed">⏱ ${elapsedText(parseOrderTime(o.Time))}</div>
+    <div class="kan-items">${itemsHtml || "—"}</div>
+    <div class="kan-total">${fmtMoney(o["Total Amount"])}</div>
+    ${actionsHtml}
+  `;
+  return div;
+}
+
+function renderKanbanBoard() {
+  if (!document.getElementById("colPending")) return;
+  const customDate = document.getElementById("ordersCustomDate").value;
+  let filtered = allOrders.filter(o => inRange(parseOrderTime(o.Time), ordersRange, customDate));
+  filtered = [...filtered].sort((a, b) => (parseOrderTime(a.Time) || 0) - (parseOrderTime(b.Time) || 0));
+
+  const cols = {
+    Pending: [], Preparing: [], Ready: [], "Out for Delivery": [], Completed: [], Cancelled: []
+  };
+  filtered.forEach(o => {
+    const s = (o.Status || "Pending").trim();
+    if (cols.hasOwnProperty(s)) cols[s].push(o);
+  });
+
+  const mapping = [
+    ["Pending", "colPending", "countPending"],
+    ["Preparing", "colPreparing", "countPreparing"],
+    ["Ready", "colReady", "countReady"],
+    ["Out for Delivery", "colOutForDelivery", "countOutForDelivery"],
+    ["Completed", "colCompleted", "countCompleted"],
+    ["Cancelled", "colCancelled", "countCancelled"]
+  ];
+
+  mapping.forEach(([status, colId, countId]) => {
+    const list = cols[status];
+    document.getElementById(countId).textContent = list.length;
+    const box = document.getElementById(colId);
+    box.innerHTML = "";
+    if (list.length === 0) {
+      box.innerHTML = '<div class="kan-empty">No orders</div>';
+    } else {
+      list.forEach(o => box.appendChild(renderKanCard(o)));
+    }
+  });
+
+  document.getElementById("cancelledCount").textContent = cols.Cancelled.length;
+
+  // Live stats (non-cancelled orders in current range)
+  const activeOrders = filtered.filter(o => (o.Status || "Pending").trim() !== "Cancelled");
+  const revenue = activeOrders.reduce((sum, o) => sum + (parseFloat(o["Total Amount"]) || 0), 0);
+  document.getElementById("kanTotal").textContent = activeOrders.length;
+  document.getElementById("kanRevenue").textContent = fmtMoney(revenue);
+  document.getElementById("kanAvg").textContent = fmtMoney(activeOrders.length ? Math.round(revenue / activeOrders.length) : 0);
+}
+
+// ---- Order detail modal ----
+function openOrderModal(orderId) {
+  const matches = allOrders.filter(o => String(o["Order ID"]) === String(orderId));
+  const o = matches[matches.length - 1]; // latest row for that order id
+  if (!o) return;
+  const box = document.getElementById("orderModalBox");
+  const isDelivery = (o["Delivery Method"] || "").toLowerCase() === "delivery";
+
+  box.innerHTML = `
+    <div class="modal-top">
+      <div>
+        <div class="modal-order-id">Order #${o["Order ID"]}</div>
+        <span class="badge ${badgeClass(o.Status)}">${o.Status || "Pending"}</span>
+      </div>
+      <div class="modal-close" onclick="closeOrderModal()">✕</div>
+    </div>
+    <div class="modal-row"><div class="k">Customer</div><div class="v">${o["Customer Name"] || "—"}</div></div>
+    <div class="modal-row"><div class="k">Phone</div><div class="v">${o["Phone Number"] || "—"}</div></div>
+    <div class="modal-row"><div class="k">Items</div><div class="v">${o.Items || "—"}</div></div>
+    <div class="modal-row"><div class="k">Amount</div><div class="v">${fmtMoney(o["Total Amount"])}</div></div>
+    <div class="modal-row"><div class="k">Order Type</div><div class="v">${o["Delivery Method"] || "—"}</div></div>
+    ${isDelivery ? `<div class="modal-row"><div class="k">Address</div><div class="v">${o["Delivery Address"] || "—"}</div></div>` : ""}
+    <div class="modal-row"><div class="k">Payment</div><div class="v">${o.Payment || "—"}</div></div>
+    <div class="modal-row"><div class="k">Time</div><div class="v">${o.Time || "—"}</div></div>
+
+    <div class="modal-actions" id="modalActions"></div>
+    <div class="modal-status-msg" id="modalStatusMsg"></div>
+  `;
+
+  const actionsBox = document.getElementById("modalActions");
+  const action = nextActionFor(o);
+  const status = (o.Status || "Pending").trim();
+  actionsBox.innerHTML = "";
+  if (action) {
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.style.background = action.color;
+    btn.textContent = action.label;
+    btn.onclick = () => updateOrderStatus(o["Order ID"], action.next);
+    actionsBox.appendChild(btn);
+  }
+  if (status === "Pending" || status === "Preparing") {
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "action-btn cancelled";
+    cancelBtn.textContent = "Cancel Order";
+    cancelBtn.onclick = () => { if (confirm(`Order #${o["Order ID"]} cancel karna hai?`)) updateOrderStatus(o["Order ID"], "Cancelled"); };
+    actionsBox.appendChild(cancelBtn);
+  }
+  if (!action && status !== "Pending" && status !== "Preparing") {
+    actionsBox.innerHTML = `<div class="empty" style="padding:8px 0;">Ye order ${status.toLowerCase()} hai — koi action available nahi</div>`;
+  }
+
+  document.getElementById("orderModalOverlay").style.display = "flex";
+}
+
+function closeOrderModal() {
+  document.getElementById("orderModalOverlay").style.display = "none";
+}
+
+document.getElementById("orderModalOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeOrderModal();
+});
+
+async function updateOrderStatus(orderId, newStatus) {
+  const msg = document.getElementById("modalStatusMsg");
+  const buttons = document.querySelectorAll(".modal-actions .action-btn");
+  buttons.forEach(b => b.disabled = true);
+  if (msg) msg.textContent = "Updating…";
+  try {
+    const res = await fetch(UPDATE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, status: newStatus })
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    // Optimistic local update
+    allOrders.forEach(o => { if (String(o["Order ID"]) === String(orderId)) o.Status = newStatus; });
+    if (msg) msg.textContent = "Status updated ✓";
+    renderKanbanBoard();
+    renderOrderStatusPanel();
+    updateBellBadge();
+    setTimeout(closeOrderModal, 600);
+  } catch (err) {
+    if (msg) msg.textContent = "Update fail ho gaya: " + err.message;
+    buttons.forEach(b => b.disabled = false);
+  }
+}
+
+</script>
+</body>
+</html>
