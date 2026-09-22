@@ -145,6 +145,7 @@
   .items-cell { color: var(--text-dim); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .amt { font-weight: 600; }
   .table-scroll { overflow-x: auto; }
+  #dashboardPage .row-2 > .panel:first-child .table-scroll { max-height: 520px; overflow-y: auto; }
 
   .top-item-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--panel-border); }
   .top-item-row:last-child { border-bottom: none; }
@@ -530,7 +531,7 @@
 const SHEET_ID = "1BWwx1h_lQZkIL5xbA7DDVp6u_2uHSKyWpbOfw_Vf4fM";
 const ORDERS_GID = "618526932";
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${ORDERS_GID}`;
-const UPDATE_ENDPOINT = "https://aslamshah.app.n8n.cloud/webhook/update-order-status";
+const UPDATE_ENDPOINT = "https://hashirkhan888.app.n8n.cloud/webhook/update-order-status";
 const REFRESH_MS = 20000;
 
 let allOrders = [];
@@ -597,7 +598,9 @@ function parseItemsList(itemsStr) {
 }
 
 function inRange(orderDate, rangeKey, customDateStr) {
-  if (!orderDate) return false;
+  // Unparseable/missing Time (bad sheet formatting) — never silently hide a real order.
+  // Treat it as "always visible" so staff still see it and can fix the date in the sheet.
+  if (!orderDate) return true;
   const now = pkNow();
   const ny = now.getUTCFullYear(), nm = now.getUTCMonth(), nd = now.getUTCDate();
   const oy = orderDate.getFullYear(), om = orderDate.getMonth(), od = orderDate.getDate();
@@ -798,7 +801,7 @@ function buildDashboardData(rows) {
 
   const todayOrders = orders.filter(o => {
     const d = parseOrderTime(o.Time);
-    if (!d) return false;
+    if (!d) return true; // unparseable Time -> don't hide a real order, assume it's a fresh one
     return d.getDate() === now.getUTCDate() &&
            d.getMonth() === now.getUTCMonth() &&
            d.getFullYear() === now.getUTCFullYear();
@@ -809,9 +812,13 @@ function buildDashboardData(rows) {
     return m === "dine-in" || m === "dine in" || m === "dinein";
   };
 
-  const recentOrders = [...orders]
-    .sort((a, b) => (parseOrderTime(b.Time) || 0) - (parseOrderTime(a.Time) || 0))
-    .slice(0, 5)
+  // Orders with an unparseable Time are almost always freshly-added rows — sort them to the very top
+  // instead of the bottom, so a new order is never buried or missed.
+  const FUTURE_SENTINEL = Date.now() + 10 * 365 * 24 * 60 * 60 * 1000;
+  const timeSortValue = o => { const d = parseOrderTime(o.Time); return d ? d.getTime() : FUTURE_SENTINEL; };
+
+  const recentOrders = [...todayOrders]
+    .sort((a, b) => timeSortValue(b) - timeSortValue(a))
     .map(o => ({
       orderId: o["Order ID"],
       customer: o["Customer Name"],
@@ -949,7 +956,9 @@ function renderKanbanBoard() {
   if (!document.getElementById("colPending")) return;
   const customDate = document.getElementById("ordersCustomDate").value;
   let filtered = allOrders.filter(o => inRange(parseOrderTime(o.Time), ordersRange, customDate));
-  filtered = [...filtered].sort((a, b) => (parseOrderTime(a.Time) || 0) - (parseOrderTime(b.Time) || 0));
+  const FUTURE_SENTINEL = Date.now() + 10 * 365 * 24 * 60 * 60 * 1000;
+  const timeSortValue = o => { const d = parseOrderTime(o.Time); return d ? d.getTime() : FUTURE_SENTINEL; };
+  filtered = [...filtered].sort((a, b) => timeSortValue(b) - timeSortValue(a)); // newest first
 
   const cols = {
     Pending: [], Preparing: [], Ready: [], "Out for Delivery": [], Completed: [], Cancelled: []
