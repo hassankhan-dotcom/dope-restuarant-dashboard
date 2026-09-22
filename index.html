@@ -12,9 +12,9 @@
     --panel: rgba(255, 255, 255, 0.055);
     --panel-border: rgba(255, 255, 255, 0.14);
     --glass-hi: rgba(255, 255, 255, 0.22);
-    --glass-blur: blur(28px) saturate(180%);
-    --accent: #00e0d1;
-    --accent-soft: rgba(0, 224, 209, 0.16);
+    --glass-blur: blur(20px) saturate(150%);
+    --accent: #00c2b8;
+    --accent-soft: rgba(0, 194, 184, 0.14);
     --text: #f0f4f8;
     --text-dim: #9aa7b8;
     --text-faint: #5b6678;
@@ -29,10 +29,8 @@
   html { background: var(--bg); }
   body {
     background:
-      radial-gradient(80vw 60vh at 10% -5%, rgba(0, 224, 209, 0.16), transparent 65%),
-      radial-gradient(70vw 55vh at 92% 8%, rgba(124, 92, 255, 0.17), transparent 60%),
-      radial-gradient(75vw 60vh at 98% 90%, rgba(0, 224, 209, 0.10), transparent 65%),
-      radial-gradient(80vw 65vh at 40% 105%, rgba(90, 163, 255, 0.12), transparent 65%),
+      radial-gradient(80vw 60vh at 10% -5%, rgba(0, 194, 184, 0.08), transparent 65%),
+      radial-gradient(75vw 60vh at 98% 90%, rgba(0, 194, 184, 0.05), transparent 65%),
       var(--bg);
     background-attachment: fixed;
     background-color: var(--bg);
@@ -110,10 +108,10 @@
     margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
   }
   .search-box {
-    flex: 1; max-width: 380px;
+    flex: 1; max-width: 460px;
     background: var(--panel); border: 1px solid var(--panel-border);
-    border-radius: 14px; padding: 9px 14px;
-    color: var(--text-faint); font-size: 13px;
+    border-radius: 100px; padding: 13px 20px;
+    color: var(--text-faint); font-size: 14px;
   }
   .top-right { display: flex; align-items: center; gap: 14px; }
   .status-pill {
@@ -134,8 +132,12 @@
     display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 14px; margin-bottom: 16px;
   }
+  .dash-greeting { margin-bottom: 18px; }
+  .dash-greeting h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .dash-greeting p { font-size: 13px; color: var(--text-dim); }
   .kpi {
-    background: var(--panel); border: 1px solid var(--panel-border);
+    background: linear-gradient(160deg, rgba(0,194,184,0.10), rgba(255,255,255,0.03));
+    border: 1px solid var(--panel-border);
     border-radius: 22px; padding: 17px 19px;
   }
   .kpi-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -199,8 +201,7 @@
   #gateOverlay {
     position: fixed; inset: 0; z-index: 999;
     background:
-      radial-gradient(80vw 60vh at 10% -5%, rgba(0, 224, 209, 0.16), transparent 65%),
-      radial-gradient(70vw 55vh at 92% 8%, rgba(124, 92, 255, 0.17), transparent 60%),
+      radial-gradient(80vw 60vh at 10% -5%, rgba(0, 194, 184, 0.10), transparent 65%),
       var(--bg);
     display: flex; align-items: center; justify-content: center;
     padding: 20px;
@@ -417,7 +418,7 @@
     <div class="sb-item"><span class="ic">▧</span> Reports <span class="sb-soon">Soon</span></div>
     <div class="sb-item"><span class="ic">⚙</span> Settings <span class="sb-soon">Soon</span></div>
   </div>
-  <div class="sb-footer">The Dope Restaurant<br>Powered by n8n</div>
+  <div class="sb-footer">Dope Restaurant<br>Powered by ShahFlow</div>
 </div>
 
 <div class="main">
@@ -439,6 +440,10 @@
   <div id="errorBox"></div>
 
   <div id="dashboardPage">
+  <div class="dash-greeting">
+    <h2>Welcome back, ShahFlow</h2>
+    <p>A calm view of what's happening at your restaurant.</p>
+  </div>
   <div class="kpi-grid">
     <div class="kpi">
       <div class="kpi-top"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Orders</div></div>
