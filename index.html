@@ -7,14 +7,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #05070c;
-    --sidebar: rgba(16, 20, 30, 0.45);
-    --panel: rgba(255, 255, 255, 0.055);
-    --panel-border: rgba(255, 255, 255, 0.14);
+    --bg: #060a18;
+    --sidebar: rgba(20, 26, 48, 0.55);
+    --panel: rgba(30, 41, 75, 0.42);
+    --panel-border: rgba(255, 255, 255, 0.12);
     --glass-hi: rgba(255, 255, 255, 0.22);
-    --glass-blur: blur(20px) saturate(150%);
-    --accent: #00c2b8;
-    --accent-soft: rgba(0, 194, 184, 0.14);
+    --glass-blur: blur(20px) saturate(160%);
+    --accent: #22d3ee;
+    --accent-soft: rgba(34, 211, 238, 0.16);
+    --grad1: #3b82f6;
+    --grad2: #8b5cf6;
     --text: #f0f4f8;
     --text-dim: #9aa7b8;
     --text-faint: #5b6678;
@@ -29,8 +31,12 @@
   html { background: var(--bg); }
   body {
     background:
-      radial-gradient(80vw 60vh at 10% -5%, rgba(0, 194, 184, 0.08), transparent 65%),
-      radial-gradient(75vw 60vh at 98% 90%, rgba(0, 194, 184, 0.05), transparent 65%),
+      radial-gradient(38vw 32vh at 8% 6%, rgba(59, 130, 246, 0.38), transparent 70%),
+      radial-gradient(30vw 26vh at 30% 2%, rgba(139, 92, 246, 0.30), transparent 70%),
+      radial-gradient(34vw 30vh at 70% 12%, rgba(217, 70, 239, 0.20), transparent 70%),
+      radial-gradient(36vw 34vh at 95% 55%, rgba(34, 211, 238, 0.22), transparent 70%),
+      radial-gradient(40vw 36vh at 15% 90%, rgba(59, 130, 246, 0.24), transparent 70%),
+      radial-gradient(36vw 32vh at 85% 95%, rgba(139, 92, 246, 0.26), transparent 70%),
       var(--bg);
     background-attachment: fixed;
     background-color: var(--bg);
@@ -94,9 +100,11 @@
   }
   .sb-item .ic { width: 16px; text-align: center; opacity: 0.85; }
   .sb-item.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: linear-gradient(135deg, rgba(34,211,238,0.28), rgba(59,130,246,0.20));
+    border: 1px solid rgba(34,211,238,0.4);
+    color: #d7fbff;
     font-weight: 600;
+    box-shadow: 0 4px 16px rgba(34,211,238,0.22);
   }
   .sb-footer { margin-top: auto; font-size: 11px; color: var(--text-faint); padding: 10px 6px; }
 
@@ -124,7 +132,7 @@
   .dot.pulse { animation: pulse 1.8s infinite; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
   .owner { display: flex; align-items: center; gap: 8px; }
-  .avatar { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.14); }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--grad1), var(--grad2)); }
   .owner .name { font-size: 12.5px; font-weight: 600; }
   .owner .role { font-size: 10.5px; color: var(--text-dim); }
 
@@ -136,14 +144,17 @@
   .dash-greeting h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
   .dash-greeting p { font-size: 13px; color: var(--text-dim); }
   .kpi {
-    background: linear-gradient(160deg, rgba(0,194,184,0.10), rgba(255,255,255,0.03));
+    background: linear-gradient(160deg, rgba(59,130,246,0.14), rgba(255,255,255,0.02));
     border: 1px solid var(--panel-border);
     border-radius: 22px; padding: 17px 19px;
   }
   .kpi-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   .kpi-icon {
-    width: 32px; height: 32px; background: var(--accent-soft); border-radius: 9px;
-    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--grad1), var(--grad2));
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    box-shadow: 0 4px 14px rgba(59,130,246,0.35);
   }
   .kpi-label { font-size: 12px; color: var(--text-dim); }
   .kpi-value { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
@@ -185,7 +196,7 @@
 
   .top-item-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--panel-border); }
   .top-item-row:last-child { border-bottom: none; }
-  .rank { width: 22px; height: 22px; border-radius: 7px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rank { width: 24px; height: 24px; border-radius: 8px; background: linear-gradient(135deg, var(--grad1), var(--accent)); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 3px 10px rgba(34,211,238,0.28); }
   .top-item-name { font-size: 12.5px; flex: 1; }
   .top-item-count { font-size: 12.5px; font-weight: 600; color: var(--text-dim); }
 
@@ -465,6 +476,14 @@
       <div class="kpi-value" id="kpiDinein">—</div>
       <div class="kpi-sub" id="kpiDineinSub">Today — · All —</div>
     </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px;">
+    <div class="panel-title">
+      <span>Orders Overview</span>
+      <span class="tag">Last 7 days</span>
+    </div>
+    <div style="height:220px;"><canvas id="ordersOverviewChart"></canvas></div>
   </div>
 
   <div class="row-2">
@@ -892,6 +911,50 @@ function buildDashboardData(rows) {
   };
 }
 
+let overviewChart = null;
+function renderOrdersOverviewChart() {
+  const canvas = document.getElementById("ordersOverviewChart");
+  if (!canvas) return;
+  const days = [];
+  const counts = [];
+  const now = pkNow();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    days.push(d.toLocaleDateString(undefined, { weekday: "short" }));
+    const dayCount = allOrders.filter(o => {
+      const t = parseOrderTime(o.Time);
+      return t && t.getFullYear() === d.getFullYear() && t.getMonth() === d.getMonth() && t.getDate() === d.getDate();
+    }).length;
+    counts.push(dayCount);
+  }
+  const ctx = canvas.getContext("2d");
+  if (overviewChart) {
+    overviewChart.data.labels = days;
+    overviewChart.data.datasets[0].data = counts;
+    overviewChart.update();
+    return;
+  }
+  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, "rgba(34,211,238,0.35)");
+  gradient.addColorStop(1, "rgba(34,211,238,0.0)");
+  overviewChart = new Chart(ctx, {
+    type: "line",
+    data: { labels: days, datasets: [{
+      data: counts, borderColor: "#22d3ee", backgroundColor: gradient,
+      fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: "#22d3ee",
+      pointBorderColor: "#0b1120", pointBorderWidth: 2, borderWidth: 2.5
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#9aa7b8", font: { size: 11 } }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { color: "#9aa7b8", font: { size: 11 }, precision: 0 }, grid: { color: "rgba(255,255,255,0.06)" } }
+      }
+    }
+  });
+}
+
 async function fetchData() {
   try {
     const cacheBust = `&_ts=${Date.now()}`;
@@ -906,6 +969,7 @@ async function fetchData() {
     render(data);
     renderOrderStatusPanel();
     renderTopItemsPanel();
+    renderOrdersOverviewChart();
     renderKanbanBoard();
     updateBellBadge();
     setStatus(true, "Live · updated " + new Date().toLocaleTimeString());
