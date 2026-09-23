@@ -109,7 +109,10 @@
   .sb-footer { margin-top: auto; font-size: 11px; color: var(--text-faint); padding: 10px 6px; }
 
   /* Main */
-  .main { flex: 1; min-width: 0; padding: 14px 22px; }
+  .main {
+    flex: 1; min-width: 0; padding: 14px 22px;
+    height: 100vh; display: flex; flex-direction: column;
+  }
 
   .topbar {
     display: flex; justify-content: space-between; align-items: center;
@@ -136,9 +139,30 @@
   .owner .name { font-size: 12.5px; font-weight: 600; }
   .owner .role { font-size: 10.5px; color: var(--text-dim); }
 
-  .kpi-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 12px; margin-bottom: 12px;
+  /* Dashboard: two rows that split the remaining viewport height exactly,
+     each row's panels matched in height; internal lists/tables scroll
+     within their own box instead of the whole page scrolling. */
+  #dashboardPage { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .dash-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+  .dash-row { flex: 1; min-height: 0; display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+  .dash-fill { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .dash-chart-wrap { flex: 1; min-height: 0; position: relative; }
+  .dash-table-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+  .dash-top-items-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+  .kpi-quad {
+    height: 100%; min-height: 0;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 12px;
+  }
+  .kpi-quad .kpi { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+  .right-col.dash-fill { gap: 12px; }
+  .dash-half { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .dash-half .donut-wrap, .dash-half .dash-top-items-wrap { flex: 1; min-height: 0; }
+  @media (max-width: 1100px) {
+    .main { height: auto; }
+    #dashboardPage, .dash-body, .dash-row { flex: none; height: auto; }
+    .dash-row { grid-template-columns: 1fr; }
+    .kpi-quad { grid-template-rows: none; }
   }
   .dash-greeting { margin-bottom: 12px; }
   .dash-greeting h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
@@ -192,7 +216,7 @@
   .items-cell { color: var(--text-dim); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .amt { font-weight: 600; }
   .table-scroll { overflow-x: auto; }
-  #dashboardPage .row-2 > .panel:first-child .table-scroll { max-height: 236px; overflow-y: auto; }
+  .dash-half .legend { overflow-y: auto; }
 
   .top-item-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--panel-border); }
   .top-item-row:last-child { border-bottom: none; }
@@ -455,44 +479,48 @@
     <h2>Welcome back, ShahFlow</h2>
     <p>A calm view of what's happening at your restaurant.</p>
   </div>
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="kpi-top"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Orders</div></div>
-      <div class="kpi-value" id="kpiTotalOrders">—</div>
-      <div class="kpi-sub">All-time</div>
+
+  <div class="dash-body">
+  <div class="dash-row dash-row-1">
+    <div class="panel dash-fill">
+      <div class="panel-title">
+        <span>Orders Overview</span>
+        <span class="tag">Last 7 days</span>
+      </div>
+      <div class="dash-chart-wrap"><canvas id="ordersOverviewChart"></canvas></div>
     </div>
-    <div class="kpi">
-      <div class="kpi-top"><div class="kpi-icon">🛍️</div><div class="kpi-label">Today's Orders</div></div>
-      <div class="kpi-value" id="kpiOrders">—</div>
-      <div class="kpi-sub">Orders placed today</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-top"><div class="kpi-icon">💬</div><div class="kpi-label">WhatsApp Orders</div></div>
-      <div class="kpi-value" id="kpiWhatsapp">—</div>
-      <div class="kpi-sub" id="kpiWhatsappSub">Today — · All —</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-top"><div class="kpi-icon">🍽️</div><div class="kpi-label">Dine-in Orders</div></div>
-      <div class="kpi-value" id="kpiDinein">—</div>
-      <div class="kpi-sub" id="kpiDineinSub">Today — · All —</div>
+
+    <div class="kpi-quad">
+      <div class="kpi">
+        <div class="kpi-top"><div class="kpi-icon">🧾</div><div class="kpi-label">Total Orders</div></div>
+        <div class="kpi-value" id="kpiTotalOrders">—</div>
+        <div class="kpi-sub">All-time</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><div class="kpi-icon">🛍️</div><div class="kpi-label">Today's Orders</div></div>
+        <div class="kpi-value" id="kpiOrders">—</div>
+        <div class="kpi-sub">Orders placed today</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><div class="kpi-icon">💬</div><div class="kpi-label">WhatsApp Orders</div></div>
+        <div class="kpi-value" id="kpiWhatsapp">—</div>
+        <div class="kpi-sub" id="kpiWhatsappSub">Today — · All —</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><div class="kpi-icon">🍽️</div><div class="kpi-label">Dine-in Orders</div></div>
+        <div class="kpi-value" id="kpiDinein">—</div>
+        <div class="kpi-sub" id="kpiDineinSub">Today — · All —</div>
+      </div>
     </div>
   </div>
 
-  <div class="panel" style="margin-bottom:12px;">
-    <div class="panel-title">
-      <span>Orders Overview</span>
-      <span class="tag">Last 7 days</span>
-    </div>
-    <div style="height:130px;"><canvas id="ordersOverviewChart"></canvas></div>
-  </div>
-
-  <div class="row-2">
-    <div class="panel">
+  <div class="dash-row dash-row-2">
+    <div class="panel dash-fill">
       <div class="panel-title">
         <span>Recent Orders <span class="tag" id="ordersTag">—</span></span>
         <span class="view-all-link" onclick="showPage('orders')">View All Orders →</span>
       </div>
-      <div class="table-scroll">
+      <div class="table-scroll dash-table-wrap">
         <table>
           <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Amount</th><th>Type</th><th>Status</th><th>Time</th></tr></thead>
           <tbody id="ordersBody"></tbody>
@@ -500,8 +528,8 @@
       </div>
     </div>
 
-    <div class="right-col">
-      <div class="panel">
+    <div class="right-col dash-fill">
+      <div class="panel dash-half">
         <div class="panel-title">
           <span>Order Status</span>
           <select class="date-filter-select" id="statusRangeSelect" onchange="onStatusRangeChange()">
@@ -522,7 +550,7 @@
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel dash-half">
         <div class="panel-title">
           <span>Top Selling Items</span>
           <select class="date-filter-select" id="topItemsRangeSelect" onchange="onTopItemsRangeChange()">
@@ -534,10 +562,11 @@
           </select>
         </div>
         <input type="date" id="topItemsCustomDate" class="date-input-inline" style="display:none;">
-        <div id="topItemsBox"></div>
+        <div id="topItemsBox" class="dash-top-items-wrap"></div>
       </div>
     </div>
   </div>
+  </div><!-- /.dash-body -->
   </div><!-- /#dashboardPage -->
 
   <div id="ordersPage" style="display:none;">
