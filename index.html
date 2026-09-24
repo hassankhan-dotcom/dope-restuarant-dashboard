@@ -1021,11 +1021,22 @@ async function fetchData() {
 
 // ---- Page switching ----
 function showPage(name) {
-  document.getElementById("dashboardPage").style.display = name === "dashboard" ? "block" : "none";
+  document.getElementById("dashboardPage").style.display = name === "dashboard" ? "flex" : "none";
   document.getElementById("ordersPage").style.display = name === "orders" ? "block" : "none";
   document.getElementById("sbDashboard").classList.toggle("active", name === "dashboard");
   document.getElementById("sbOrders").classList.toggle("active", name === "orders");
   if (name === "orders") renderKanbanBoard();
+  if (name === "dashboard") {
+    // Chart.js keeps the canvas's last pixel size from before the page was
+    // hidden (display:none collapses its container to 0 height), so coming
+    // back without a resize left the chart taller than its box — that
+    // overflow was the stray page scrollbar. Resizing on the next frame,
+    // once the container has its real flex-computed height again, fixes it.
+    requestAnimationFrame(() => {
+      if (overviewChart) overviewChart.resize();
+      if (donutChart) donutChart.resize();
+    });
+  }
 }
 
 document.getElementById("ordersRangeSelect").addEventListener("change", function() {
