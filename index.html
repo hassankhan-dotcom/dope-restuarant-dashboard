@@ -318,28 +318,71 @@
   #orderModalOverlay {
     display: none; position: fixed; inset: 0; z-index: 998;
     background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 16px;
+    animation: overlayFade 0.25s ease;
   }
+  @keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalPop { from { opacity: 0; transform: translateY(24px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .order-modal {
-    width: 100%; max-width: 440px; max-height: 85vh; overflow-y: auto;
+    width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
     background: rgba(20,24,34,0.65); border: 1px solid var(--panel-border);
-    border-radius: 24px; padding: 22px;
+    border-radius: 24px; padding: 24px;
     -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    animation: modalPop 0.35s cubic-bezier(0.16, 0.8, 0.3, 1);
   }
-  .modal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
-  .modal-order-id { font-size: 17px; font-weight: 700; }
-  .modal-close { cursor: pointer; color: var(--text-dim); font-size: 20px; line-height: 1; }
+  .modal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; gap: 12px; }
+  .modal-header-left { display: flex; gap: 12px; align-items: flex-start; }
+  .modal-icon-badge {
+    width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--grad1), var(--grad2));
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+    box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+  }
+  .modal-order-id { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .modal-type-badge { font-size: 11px; font-weight: 700; padding: 6px 13px; border-radius: 100px; background: rgba(255,255,255,0.08); border: 1px solid var(--panel-border); white-space: nowrap; }
+  .modal-close { cursor: pointer; color: var(--text-dim); font-size: 14px; line-height: 1; width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; }
+  .modal-close:hover { background: rgba(255,255,255,0.16); color: var(--text); }
+
+  .modal-info-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .modal-info-box { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.045); border: 1px solid var(--panel-border); border-radius: 13px; padding: 11px 13px; }
+  .modal-info-icon { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .modal-info-value { font-size: 13.5px; font-weight: 700; }
+  .modal-info-label { font-size: 10px; color: var(--text-dim); }
+
+  .modal-customer-card { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.045); border: 1px solid var(--panel-border); border-radius: 13px; padding: 11px 13px; margin-bottom: 12px; }
+  .modal-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--grad1), var(--grad2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .modal-customer-info { flex: 1; min-width: 0; }
+  .modal-customer-name { font-size: 13.5px; font-weight: 700; }
+  .modal-customer-label { font-size: 10px; color: var(--text-dim); margin-bottom: 3px; }
+  .modal-phone { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); }
+  .modal-call-btn { background: var(--accent-soft); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 100px; padding: 5px 13px; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .modal-call-btn:hover { filter: brightness(1.2); }
+
+  .modal-addr-row { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.045); border: 1px solid var(--panel-border); border-radius: 13px; padding: 11px 13px; margin-bottom: 12px; font-size: 12px; }
+  .modal-addr-row .v { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dim); }
+  .modal-addr-row a { color: var(--accent); text-decoration: none; font-weight: 700; flex-shrink: 0; }
+
+  .modal-items-box { background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); border-radius: 13px; padding: 4px 13px; margin-bottom: 14px; }
+  .modal-items-title { font-size: 11.5px; font-weight: 700; color: var(--text-dim); padding: 10px 0; border-bottom: 1px solid var(--panel-border); }
+  .modal-item-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--panel-border); font-size: 12px; }
+  .modal-item-row:last-child { border-bottom: none; }
+  .modal-item-icon { width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .modal-item-name { flex: 1; min-width: 0; }
+  .modal-item-qty { color: var(--text-dim); width: 26px; text-align: center; flex-shrink: 0; }
+  .modal-item-price { font-weight: 700; width: 68px; text-align: right; flex-shrink: 0; }
+
+  .modal-footer-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .modal-time-text { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
   .modal-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--panel-border); font-size: 13px; }
   .modal-row:last-of-type { border-bottom: none; }
   .modal-row .k { color: var(--text-dim); }
   .modal-row .v { text-align: right; max-width: 62%; }
-  .modal-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .modal-actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
   .action-btn {
     flex: 1; min-width: 100px; padding: 10px; border-radius: 12px;
     font-size: 12.5px; font-weight: 700; cursor: pointer; border: 1px solid transparent;
   }
-  .action-btn.preparing { background: color-mix(in srgb, var(--blue) 22%, transparent); color: var(--blue); border-color: color-mix(in srgb, var(--blue) 55%, transparent); }
-  .action-btn.ready { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--amber); border-color: color-mix(in srgb, var(--amber) 55%, transparent); }
-  .action-btn.completed { background: color-mix(in srgb, var(--green) 22%, transparent); color: var(--green); border-color: color-mix(in srgb, var(--green) 55%, transparent); }
+  .action-btn { background: color-mix(in srgb, var(--acc, var(--accent)) 22%, transparent); color: var(--acc, var(--accent)); border-color: color-mix(in srgb, var(--acc, var(--accent)) 55%, transparent); }
   .action-btn.cancelled { background: transparent; border: 1px solid var(--red); color: var(--red); }
   .action-btn:hover:not(:disabled) { filter: brightness(1.25); transform: translateY(-1px); }
   .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -365,12 +408,32 @@
   .date-filter-wrap .date-input-inline { margin-bottom: 0; width: auto; }
 
   /* Kanban board */
-  .kanban-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .kanban-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; }
   .kanban-toolbar-right { display: flex; align-items: center; gap: 10px; }
-  .kanban-stats { display: flex; gap: 22px; }
-  .kstat { display: flex; flex-direction: column; }
-  .kstat-num { font-size: 19px; font-weight: 700; }
-  .kstat-lbl { font-size: 11px; color: var(--text-dim); }
+  .op-kpi-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .op-kpi {
+    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(160deg, rgba(59,130,246,0.14), rgba(255,255,255,0.02));
+    border: 1px solid var(--panel-border); border-radius: 14px;
+    padding: 9px 14px; min-width: 148px;
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 var(--glass-hi);
+  }
+  .op-kpi-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--grad1), var(--grad2));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; box-shadow: 0 4px 12px rgba(59,130,246,0.35);
+  }
+  .op-kpi-label { font-size: 10.5px; color: var(--text-dim); }
+  .op-kpi-value { font-size: 17px; font-weight: 700; }
+  .btn-new-order {
+    background: linear-gradient(135deg, var(--grad1), var(--grad2)); color: #fff;
+    border: none; border-radius: 12px; padding: 10px 18px;
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+  }
+  .btn-new-order:hover { filter: brightness(1.12); transform: translateY(-1px); }
   .cancelled-toggle {
     font-size: 12px; color: var(--text-dim); cursor: pointer;
     background: var(--panel); border: 1px solid var(--panel-border);
@@ -378,12 +441,24 @@
   }
   .cancelled-toggle.active { color: var(--red); border-color: var(--red); }
 
-  .kanban-board { display: flex; gap: 14px; overflow-x: auto; align-items: flex-start; padding-bottom: 8px; }
+  .kanban-board {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    align-items: start;
+  }
+  #ordersPage.cancelled-shown .kanban-board { grid-template-columns: repeat(6, 1fr); }
   .kanban-col {
-    flex: 0 0 250px; width: 250px;
+    min-width: 0;
     background: var(--panel); border: 1px solid var(--panel-border); border-radius: 20px;
     padding: 12px; display: flex; flex-direction: column;
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - 270px);
+    -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 var(--glass-hi);
+  }
+  @media (max-width: 1300px) {
+    .kanban-board, #ordersPage.cancelled-shown .kanban-board { grid-template-columns: repeat(3, 1fr); overflow-x: visible; }
+  }
+  @media (max-width: 760px) {
+    .kanban-board, #ordersPage.cancelled-shown .kanban-board { grid-template-columns: repeat(2, 1fr); }
   }
   .kanban-col-header {
     display: flex; align-items: center; gap: 7px;
@@ -402,14 +477,22 @@
     border-radius: 14px; padding: 11px; cursor: pointer;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
   }
-  .kan-card:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
-  .kan-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .kan-card:hover {
+    background: rgba(255,255,255,0.09);
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--card-acc, var(--accent)) 55%, transparent);
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--card-acc, var(--accent)) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .kan-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .kan-order-id { font-weight: 700; font-size: 12.5px; }
   .kan-type-tag { font-size: 9.5px; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--text-dim); }
-  .kan-customer { font-size: 12px; margin-bottom: 3px; }
-  .kan-elapsed { font-size: 10.5px; color: var(--text-dim); margin-bottom: 8px; }
-  .kan-items { font-size: 11px; color: var(--text-dim); margin-bottom: 9px; line-height: 1.5; }
-  .kan-total { font-size: 12.5px; font-weight: 700; margin-bottom: 9px; }
+  .kan-meta { font-size: 10.5px; color: var(--text-dim); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .kan-row { font-size: 11.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+  .kan-row-icon { opacity: 0.65; font-size: 10.5px; flex-shrink: 0; }
+  .kan-items-row { color: var(--text-dim); font-size: 11px; align-items: flex-start; }
+  .kan-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--panel-border); }
+  .kan-total { font-size: 13px; font-weight: 700; }
+  .kan-view-link { font-size: 11px; font-weight: 700; color: var(--card-acc, var(--accent)); }
   .kan-actions { display: flex; gap: 6px; }
   .kan-btn {
     flex: 1; padding: 8px; border-radius: 10px;
@@ -576,10 +659,23 @@
 
   <div id="ordersPage" style="display:none;">
     <div class="kanban-toolbar">
-      <div class="kanban-stats">
-        <div class="kstat"><span class="kstat-num" id="kanTotal">0</span><span class="kstat-lbl">Orders</span></div>
-        <div class="kstat"><span class="kstat-num" id="kanRevenue">Rs. 0</span><span class="kstat-lbl">Revenue</span></div>
-        <div class="kstat"><span class="kstat-num" id="kanAvg">Rs. 0</span><span class="kstat-lbl">Avg Ticket</span></div>
+      <div class="op-kpi-row">
+        <div class="op-kpi">
+          <div class="op-kpi-icon">📦</div>
+          <div class="op-kpi-text"><div class="op-kpi-label">Today Orders</div><div class="op-kpi-value" id="opKpiToday">—</div></div>
+        </div>
+        <div class="op-kpi">
+          <div class="op-kpi-icon">🛵</div>
+          <div class="op-kpi-text"><div class="op-kpi-label">Delivery Orders</div><div class="op-kpi-value" id="opKpiDelivery">—</div></div>
+        </div>
+        <div class="op-kpi">
+          <div class="op-kpi-icon">🛍️</div>
+          <div class="op-kpi-text"><div class="op-kpi-label">Pickup Orders</div><div class="op-kpi-value" id="opKpiPickup">—</div></div>
+        </div>
+        <div class="op-kpi">
+          <div class="op-kpi-icon">🍽️</div>
+          <div class="op-kpi-text"><div class="op-kpi-label">Dine-in Orders</div><div class="op-kpi-value" id="opKpiDinein">—</div></div>
+        </div>
       </div>
       <div class="kanban-toolbar-right">
         <div class="date-filter-wrap">
@@ -594,6 +690,7 @@
           <input type="date" id="ordersCustomDate" class="date-input-inline" style="display:none;">
         </div>
         <div class="cancelled-toggle" id="cancelledToggle" onclick="toggleCancelledStrip()">Cancelled <span id="cancelledCount">0</span></div>
+        <button class="btn-new-order" onclick="alert('Dine-in order creation is coming soon — this button is a placeholder for now.')">+ New Order</button>
       </div>
     </div>
 
@@ -740,6 +837,14 @@ function render(data) {
   document.getElementById("kpiWhatsappSub").textContent = `Today ${data.whatsapp_today ?? 0} · All ${data.whatsapp_all ?? 0}`;
   document.getElementById("kpiDinein").textContent = data.dinein_today ?? 0;
   document.getElementById("kpiDineinSub").textContent = `Today ${data.dinein_today ?? 0} · All ${data.dinein_all ?? 0}`;
+
+  const opTodayEl = document.getElementById("opKpiToday");
+  if (opTodayEl) {
+    opTodayEl.textContent = data.orders_count ?? 0;
+    document.getElementById("opKpiDelivery").textContent = data.delivery_today ?? 0;
+    document.getElementById("opKpiPickup").textContent = data.pickup_today ?? 0;
+    document.getElementById("opKpiDinein").textContent = data.dinein_today ?? 0;
+  }
 
   const tbody = document.getElementById("ordersBody");
   tbody.innerHTML = "";
@@ -915,6 +1020,8 @@ function buildDashboardData(rows) {
     const m = (o["Delivery Method"] || "").toLowerCase().trim();
     return m === "dine-in" || m === "dine in" || m === "dinein";
   };
+  const isDelivery = o => (o["Delivery Method"] || "").toLowerCase().trim() === "delivery";
+  const isPickup = o => (o["Delivery Method"] || "").toLowerCase().trim() === "pickup";
 
   // Orders with an unparseable Time are almost always freshly-added rows — sort them to the very top
   // instead of the bottom, so a new order is never buried or missed.
@@ -941,6 +1048,8 @@ function buildDashboardData(rows) {
     whatsapp_all: orders.length,
     dinein_today: todayOrders.filter(isDinein).length,
     dinein_all: orders.filter(isDinein).length,
+    delivery_today: todayOrders.filter(isDelivery).length,
+    pickup_today: todayOrders.filter(isPickup).length,
     recent_orders: recentOrders
   };
 }
@@ -1050,6 +1159,7 @@ function toggleCancelledStrip() {
   showCancelled = !showCancelled;
   document.getElementById("cancelledToggle").classList.toggle("active", showCancelled);
   document.getElementById("cancelledCol").style.display = showCancelled ? "flex" : "none";
+  document.getElementById("ordersPage").classList.toggle("cancelled-shown", showCancelled);
 }
 
 function updateBellBadge() {
@@ -1082,32 +1192,26 @@ function renderKanCard(o) {
   const status = (o.Status || "Pending").trim();
   const color = STATUS_COLORS[status] || "#666";
   const items = parseItemsList(o.Items);
-  const itemsHtml = items.slice(0, 3).map(i => `${i.qty ? i.qty + "x " : ""}${i.name}`).join(", ") + (items.length > 3 ? ` +${items.length - 3} more` : "");
-  const action = nextActionFor(o);
-  const showCancel = status === "Pending" || status === "Preparing";
-
-  let actionsHtml = "";
-  if (action) {
-    actionsHtml = `<div class="kan-actions">
-      <button class="kan-btn" style="--acc:${action.color}" onclick="event.stopPropagation(); updateOrderStatus('${o['Order ID']}','${action.next}')">${action.label}</button>
-      ${showCancel ? `<button class="kan-btn cancel" title="Cancel order" onclick="event.stopPropagation(); if(confirm('Order #${o['Order ID']} cancel karna hai?')) updateOrderStatus('${o['Order ID']}','Cancelled')">✕</button>` : ""}
-    </div>`;
-  }
+  const itemsHtml = items.slice(0, 2).map(i => `${i.qty ? i.qty + "x " : ""}${i.name}`).join(", ") + (items.length > 2 ? ` +${items.length - 2} more` : "");
 
   const div = document.createElement("div");
   div.className = "kan-card";
   div.style.borderLeftColor = color;
+  div.style.setProperty("--card-acc", color);
   div.onclick = () => openOrderModal(o["Order ID"]);
   div.innerHTML = `
     <div class="kan-card-top">
       <span class="kan-order-id">#${o["Order ID"] ?? "—"}</span>
       <span class="kan-type-tag">${o["Delivery Method"] ?? "—"}</span>
     </div>
-    <div class="kan-customer">${o["Customer Name"] ?? "—"}</div>
-    <div class="kan-elapsed">⏱ ${elapsedText(parseOrderTime(o.Time))}</div>
-    <div class="kan-items">${itemsHtml || "—"}</div>
-    <div class="kan-total">${fmtMoney(o["Total Amount"])}</div>
-    ${actionsHtml}
+    <div class="kan-meta"><span class="kan-row-icon">🕐</span>${elapsedText(parseOrderTime(o.Time))}</div>
+    <div class="kan-row"><span class="kan-row-icon">👤</span>${o["Customer Name"] ?? "—"}</div>
+    <div class="kan-row"><span class="kan-row-icon">📞</span>${o["Phone Number"] ?? "—"}</div>
+    <div class="kan-row kan-items-row"><span class="kan-row-icon">🧾</span>${itemsHtml || "—"}</div>
+    <div class="kan-bottom">
+      <span class="kan-total">${fmtMoney(o["Total Amount"])}</span>
+      <span class="kan-view-link">View →</span>
+    </div>
   `;
   return div;
 }
@@ -1150,13 +1254,19 @@ function renderKanbanBoard() {
   });
 
   document.getElementById("cancelledCount").textContent = cols.Cancelled.length;
+}
 
-  // Live stats (non-cancelled orders in current range)
-  const activeOrders = filtered.filter(o => (o.Status || "Pending").trim() !== "Cancelled");
-  const revenue = activeOrders.reduce((sum, o) => sum + (parseFloat(o["Total Amount"]) || 0), 0);
-  document.getElementById("kanTotal").textContent = activeOrders.length;
-  document.getElementById("kanRevenue").textContent = fmtMoney(revenue);
-  document.getElementById("kanAvg").textContent = fmtMoney(activeOrders.length ? Math.round(revenue / activeOrders.length) : 0);
+function itemEmoji(name) {
+  const n = (name || "").toLowerCase();
+  if (n.includes("pizza")) return "🍕";
+  if (n.includes("burger")) return "🍔";
+  if (n.includes("fries")) return "🍟";
+  if (n.includes("wrap")) return "🌯";
+  if (n.includes("pasta")) return "🍝";
+  if (n.includes("drink") || n.includes("cola") || n.includes("coke") || n.includes("juice")) return "🥤";
+  if (n.includes("roll") || n.includes("kebab") || n.includes("behari")) return "🥙";
+  if (n.includes("coffee") || n.includes("tea")) return "☕";
+  return "🍽️";
 }
 
 // ---- Order detail modal ----
@@ -1166,36 +1276,91 @@ function openOrderModal(orderId) {
   if (!o) return;
   const box = document.getElementById("orderModalBox");
   const isDelivery = (o["Delivery Method"] || "").toLowerCase() === "delivery";
+  const status = (o.Status || "Pending").trim();
+  const initials = (o["Customer Name"] || "?").trim().charAt(0).toUpperCase();
+  const items = parseItemsList(o.Items);
+  const itemsRowsHtml = items.length
+    ? items.map(i => `
+        <div class="modal-item-row">
+          <div class="modal-item-icon">${itemEmoji(i.name)}</div>
+          <div class="modal-item-name">${i.name}</div>
+          <div class="modal-item-qty">${i.qty || 1}×</div>
+        </div>`).join("")
+    : `<div class="modal-item-row"><div class="modal-item-name">${o.Items || "—"}</div></div>`;
 
   box.innerHTML = `
     <div class="modal-top">
-      <div>
-        <div class="modal-order-id">Order #${o["Order ID"]}</div>
-        <span class="badge ${badgeClass(o.Status)}">${o.Status || "Pending"}</span>
+      <div class="modal-header-left">
+        <div class="modal-icon-badge">🧾</div>
+        <div>
+          <div class="modal-order-id">Order #${o["Order ID"]}</div>
+          <span class="badge ${badgeClass(status)}">${status}</span>
+        </div>
       </div>
-      <div class="modal-close" onclick="closeOrderModal()">✕</div>
+      <div class="modal-header-right">
+        <div class="modal-close" onclick="closeOrderModal()">✕</div>
+        <span class="modal-type-badge">${o["Delivery Method"] || "—"}</span>
+      </div>
     </div>
-    <div class="modal-row"><div class="k">Customer</div><div class="v">${o["Customer Name"] || "—"}</div></div>
-    <div class="modal-row"><div class="k">Phone</div><div class="v">${o["Phone Number"] || "—"}</div></div>
-    <div class="modal-row"><div class="k">Items</div><div class="v">${o.Items || "—"}</div></div>
-    <div class="modal-row"><div class="k">Amount</div><div class="v">${fmtMoney(o["Total Amount"])}</div></div>
-    <div class="modal-row"><div class="k">Order Type</div><div class="v">${o["Delivery Method"] || "—"}</div></div>
-    ${isDelivery ? `<div class="modal-row"><div class="k">Address</div><div class="v">${o["Delivery Address"] || "—"}</div></div>` : ""}
-    <div class="modal-row"><div class="k">Payment</div><div class="v">${o.Payment || "—"}</div></div>
-    <div class="modal-row"><div class="k">Time</div><div class="v">${o.Time || "—"}</div></div>
 
-    <div class="modal-actions" id="modalActions"></div>
+    <div class="modal-info-row">
+      <div class="modal-info-box">
+        <div class="modal-info-icon">💰</div>
+        <div><div class="modal-info-value">${fmtMoney(o["Total Amount"])}</div><div class="modal-info-label">Total Amount</div></div>
+      </div>
+      <div class="modal-info-box">
+        <div class="modal-info-icon">📅</div>
+        <div><div class="modal-info-value">${o.Time || "—"}</div><div class="modal-info-label">Order Time</div></div>
+      </div>
+    </div>
+
+    <div class="modal-customer-card">
+      <div class="modal-avatar">${initials}</div>
+      <div class="modal-customer-info">
+        <div class="modal-customer-label">Customer</div>
+        <div class="modal-customer-name">${o["Customer Name"] || "—"}</div>
+      </div>
+      <div class="modal-phone">📞 ${o["Phone Number"] || "—"}</div>
+      ${o["Phone Number"] ? `<a class="modal-call-btn" href="tel:${o["Phone Number"]}">Call</a>` : ""}
+    </div>
+
+    <div class="modal-info-row">
+      <div class="modal-info-box">
+        <div class="modal-info-icon">🚚</div>
+        <div><div class="modal-info-value">${o["Delivery Method"] || "—"}</div><div class="modal-info-label">Delivery Method</div></div>
+      </div>
+      <div class="modal-info-box">
+        <div class="modal-info-icon">💳</div>
+        <div><div class="modal-info-value">${o.Payment || "—"}</div><div class="modal-info-label">Payment Method</div></div>
+      </div>
+    </div>
+
+    ${isDelivery && o["Delivery Address"] ? `
+    <div class="modal-addr-row">
+      <span>📍</span>
+      <div class="v">${o["Delivery Address"]}</div>
+      <a href="${o["Delivery Address"]}" target="_blank" rel="noopener">Open →</a>
+    </div>` : ""}
+
+    <div class="modal-items-box">
+      <div class="modal-items-title">🍴 Items (${items.length || 1})</div>
+      ${itemsRowsHtml}
+    </div>
+
+    <div class="modal-footer-row">
+      <div class="modal-time-text">🕐 ${o.Time || "—"}</div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
     <div class="modal-status-msg" id="modalStatusMsg"></div>
   `;
 
   const actionsBox = document.getElementById("modalActions");
   const action = nextActionFor(o);
-  const status = (o.Status || "Pending").trim();
   actionsBox.innerHTML = "";
   if (action) {
     const btn = document.createElement("button");
-    btn.className = "action-btn";
-    btn.style.background = action.color;
+    btn.className = "action-btn " + action.next.toLowerCase().replace(/\s+/g, "-");
+    btn.style.setProperty("--acc", action.color);
     btn.textContent = action.label;
     btn.onclick = () => updateOrderStatus(o["Order ID"], action.next);
     actionsBox.appendChild(btn);
