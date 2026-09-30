@@ -902,30 +902,10 @@ let ordersRange = "today";
 let showCancelled = false;
 
 const marketingSegments = {
-  active: { name: "Active", range: "0-7 days", icon: "✓", color: "var(--green)", customers: [
-    { name: "Ayesha Khan", phone: "+92 300 123 4567", days: 1, items: "Chicken Tikka Pizza, Mint Lemonade" },
-    { name: "Bilal Ahmed", phone: "+92 301 234 5678", days: 3, items: "Classic Zinger Burger, Fries" },
-    { name: "Hira Malik", phone: "+92 302 345 6789", days: 5, items: "Alfredo Pasta, Garlic Bread" },
-    { name: "Usman Raza", phone: "+92 303 456 7890", days: 7, items: "Behari Roll, Cola" }
-  ] },
-  cooling: { name: "Cooling Off", range: "8-14 days", icon: "◷", color: "var(--amber)", discount: "10%", offerDays: 7, customers: [
-    { name: "Sara Iqbal", phone: "+92 304 111 2233", days: 8, items: "Pepperoni Pizza, Wings" },
-    { name: "Hamza Shah", phone: "+92 305 222 3344", days: 10, items: "Double Smash Burger" },
-    { name: "Maham Ali", phone: "+92 306 333 4455", days: 12, items: "Chicken Fettuccine" },
-    { name: "Daniyal Noor", phone: "+92 307 444 5566", days: 14, items: "BBQ Pizza, Garlic Dip" }
-  ] },
-  atRisk: { name: "At Risk", range: "15-30 days", icon: "!", color: "var(--violet)", discount: "15%", offerDays: 5, customers: [
-    { name: "Zara Farooq", phone: "+92 308 101 2020", days: 16, items: "Malai Boti Pizza" },
-    { name: "Omar Siddiqui", phone: "+92 309 202 3030", days: 20, items: "Beef Smash Burger, Fries" },
-    { name: "Noor Fatima", phone: "+92 310 303 4040", days: 25, items: "Creamy Mushroom Pasta" },
-    { name: "Rayan Aslam", phone: "+92 311 404 5050", days: 30, items: "Chicken Wrap, Lemonade" }
-  ] },
-  lost: { name: "Lost", range: "30+ days", icon: "↺", color: "var(--red)", discount: "20%", offerDays: 3, customers: [
-    { name: "Mariam Yousaf", phone: "+92 312 111 9090", days: 34, items: "Cheese Lover Pizza" },
-    { name: "Taha Javed", phone: "+92 313 222 8080", days: 48, items: "Crispy Chicken Burger" },
-    { name: "Eman Khalid", phone: "+92 314 333 7070", days: 67, items: "Chicken Alfredo" },
-    { name: "Saad Hussain", phone: "+92 315 444 6060", days: 92, items: "Behari Kabab Roll" }
-  ] }
+  active: { name: "Active", range: "0-7 days", icon: "✓", color: "var(--green)", customers: [] },
+  cooling: { name: "Cooling Off", range: "8-14 days", icon: "◷", color: "var(--amber)", discount: "10%", offerDays: 7, customers: [] },
+  atRisk: { name: "At Risk", range: "15-29 days", icon: "!", color: "var(--violet)", discount: "15%", offerDays: 5, customers: [] },
+  lost: { name: "Lost", range: "30+ days", icon: "↺", color: "var(--red)", discount: "20%", offerDays: 3, customers: [] }
 };
 let marketingTemplates = {
   cooling: "Hi {{name}}, we miss you! It’s been {{days}} days since your last order. Come back and get {{discount}} off.",
@@ -1277,6 +1257,7 @@ async function fetchData() {
     const parsed = JSON.parse(match[1]);
     const rows = (parsed.table && parsed.table.rows) || [];
     const data = buildDashboardData(rows);
+    refreshMarketingSegments();
     render(data);
     renderOrderStatusPanel();
     renderTopItemsPanel();
@@ -1297,6 +1278,7 @@ async function fetchData() {
 }
 
 function renderMarketingPage() {
+  refreshMarketingSegments();
   if (marketingInitialized) return;
   const cards = document.getElementById("marketingSegmentCards");
   Object.entries(marketingSegments).forEach(([key, segment]) => {
@@ -1305,6 +1287,7 @@ function renderMarketingPage() {
     card.setAttribute("role", "button");
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-expanded", "false");
+    card.dataset.segment = key;
     card.style.setProperty("--segment-color", segment.color);
     card.innerHTML = `<div class="kpi-top"><div class="kpi-icon">${segment.icon}</div><div class="kpi-label">${segment.name}</div></div><div class="kpi-value">${segment.customers.length}</div><div class="kpi-sub">customers · ${segment.range}</div>`;
     card.addEventListener("click", () => toggleMarketingSegment(key));
@@ -1338,21 +1321,67 @@ function renderMarketingPage() {
 function toggleMarketingSegment(key) {
   activeMarketingSegment = activeMarketingSegment === key ? null : key;
   document.querySelectorAll(".marketing-segment-card").forEach((card, index) => {
-    const selected = Object.keys(marketingSegments)[index] === activeMarketingSegment;
+    const selected = card.dataset.segment === activeMarketingSegment;
     card.classList.toggle("selected", selected);
     card.setAttribute("aria-expanded", String(selected));
   });
+  renderMarketingSegmentDetail();
+}
+
+function refreshMarketingSegments() {
+  const latestByPhone = new Map();
+  allOrders.forEach(order => {
+    const phone = String(order["Phone Number"] || "").trim();
+    if (!phone) return;
+    const lastOrderDate = parseOrderTime(order.Time);
+    const current = latestByPhone.get(phone);
+    if (current && (!lastOrderDate || (current.lastOrderDate && lastOrderDate < current.lastOrderDate))) return;
+    latestByPhone.set(phone, {
+      name: String(order["Customer Name"] || "").trim() || "—",
+      phone,
+      lastOrderDate,
+      items: String(order.Items || "—")
+    });
+  });
+
+  Object.values(marketingSegments).forEach(segment => { segment.customers = []; });
+  const today = pkNowLocal();
+  today.setHours(0, 0, 0, 0);
+  latestByPhone.forEach(customer => {
+    const lastOrderDay = customer.lastOrderDate
+      ? new Date(customer.lastOrderDate.getFullYear(), customer.lastOrderDate.getMonth(), customer.lastOrderDate.getDate())
+      : today;
+    customer.days = Math.max(0, Math.floor((today - lastOrderDay) / 86400000));
+    if (customer.days <= 7) marketingSegments.active.customers.push(customer);
+    else if (customer.days <= 14) marketingSegments.cooling.customers.push(customer);
+    else if (customer.days < 30) marketingSegments.atRisk.customers.push(customer);
+    else marketingSegments.lost.customers.push(customer);
+  });
+
+  if (marketingInitialized) {
+    document.querySelectorAll(".marketing-segment-card").forEach(card => {
+      const segment = marketingSegments[card.dataset.segment];
+      card.querySelector(".kpi-value").textContent = segment.customers.length;
+      card.querySelector(".kpi-sub").textContent = `customers · ${segment.range}`;
+    });
+    if (activeMarketingSegment) renderMarketingSegmentDetail();
+  }
+}
+
+function renderMarketingSegmentDetail() {
   const detail = document.getElementById("marketingSegmentDetail");
   if (!activeMarketingSegment) { detail.innerHTML = ""; detail.style.display = "none"; return; }
   const segment = marketingSegments[activeMarketingSegment];
   detail.style.display = "block";
   detail.innerHTML = `<div class="panel"><div class="panel-title"><span>${segment.name} Customers</span><span class="tag">${segment.range}</span></div><div class="marketing-table-wrap"><table class="marketing-table"><thead><tr><th>Customer Name</th><th>Phone Number</th><th>Last Order Date</th><th>Last Order Items</th></tr></thead><tbody id="marketingSegmentRows"></tbody></table></div></div>`;
   const rows = document.getElementById("marketingSegmentRows");
+  if (segment.customers.length === 0) {
+    rows.innerHTML = '<tr><td colspan="4" class="empty">No customers in this segment</td></tr>';
+    return;
+  }
   segment.customers.forEach(customer => {
-    const date = new Date();
-    date.setDate(date.getDate() - customer.days);
     const row = document.createElement("tr");
-    [customer.name, customer.phone, date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }), customer.items].forEach(value => {
+    [customer.name, customer.phone, customer.lastOrderDate ? customer.lastOrderDate.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—", customer.items].forEach(value => {
       const cell = document.createElement("td");
       cell.textContent = value;
       row.appendChild(cell);
@@ -1400,8 +1429,16 @@ function renderMarketingDnd() {
 function openMarketingPreview(key) {
   const segment = marketingSegments[key];
   if (!segment || key === "active") return;
-  const field = { cooling: "templateCooling", atRisk: "templateAtRisk", lost: "templateLost" }[key];
   const sample = segment.customers[0];
+  if (!sample) {
+    document.getElementById("marketingModalTitle").textContent = `Send to ${segment.name}`;
+    document.getElementById("marketingModalCount").textContent = "0 recipients";
+    document.getElementById("marketingModalSample").textContent = "No sample customer available.";
+    document.getElementById("marketingModalPreview").textContent = "No customers are currently in this segment.";
+    document.getElementById("marketingSendModalOverlay").style.display = "flex";
+    return;
+  }
+  const field = { cooling: "templateCooling", atRisk: "templateAtRisk", lost: "templateLost" }[key];
   const message = document.getElementById(field).value
     .replace(/\{\{name\}\}/g, sample.name)
     .replace(/\{\{discount\}\}/g, segment.discount)
