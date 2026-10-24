@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Avalon Owner Panel</title>
+<meta name="theme-color" content="#FFF4F1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Avalon">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Loading -->
+<div id="splash" class="splash"><div class="logo-big" id="splashLogo"></div><div class="spinner"></div></div>
+
+<!-- Login -->
+<section id="loginView" class="login hidden">
+  <div class="login-wrap">
+    <div class="logo-big" data-logo></div>
+    <h1>Avalon.pk</h1>
+    <p class="muted">Restaurant Owner Panel</p>
+    <form id="loginForm" class="card login-card" autocomplete="on">
+      <label>Email
+        <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="owner@example.com" required>
+      </label>
+      <label>Password
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password" required>
+      </label>
+      <div id="loginError" class="error hidden"></div>
+      <button id="loginBtn" class="btn primary" type="submit">Login</button>
+    </form>
+  </div>
+</section>
+
+<!-- Account problem -->
+<section id="problemView" class="login hidden">
+  <div class="login-wrap">
+    <div class="logo-big" data-logo></div>
+    <h1>Account link nahi hai</h1>
+    <p class="muted" id="problemText"></p>
+    <button class="btn ghost" id="problemLogout" type="button">Logout</button>
+  </div>
+</section>
+
+<!-- App -->
+<div id="appView" class="app hidden">
+  <header class="top">
+    <div class="brand">
+      <span class="logo-sm" data-logo></span>
+      <div><b>Avalon.pk</b><small>Restaurant Owner Panel</small></div>
+    </div>
+    <button class="icon-btn" id="bellBtn" aria-label="Pending orders"><span data-icon="bell"></span><i id="bellBadge" class="badge hidden">0</i></button>
+    <div class="rest-chip"><span class="avatar sm" id="restAvatar">D</span><div><b id="restName">Restaurant</b><small>Owner</small></div></div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+      <div class="greet card">
+        <div class="wave">👋</div>
+        <div class="greet-t"><h2 id="greetTitle">Good Afternoon!</h2><p>Here's what's happening at your restaurant today.</p></div>
+        <div class="date-pill"><span data-icon="calendar"></span><span id="todayLabel"></span></div>
+      </div>
+
+      <div id="notifBanner" class="banner hidden"></div>
+
+      <div class="stats" id="stats"></div>
+      <div class="tiles" id="statusTiles"></div>
+
+      <div class="card chart-card">
+        <div class="card-h"><span class="ic-red" data-icon="trend"></span><h3>Order Trend</h3></div>
+        <div class="seg" id="chartSeg">
+          <button data-r="today" class="on">Today</button><button data-r="7">7 Days</button><button data-r="30">30 Days</button>
+        </div>
+        <div id="chart" class="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="ic-orange" data-icon="bolt"></span><h3>Quick Actions</h3></div>
+        <button class="qa" data-go="orders"><span data-icon="file"></span>View All Orders<span class="chev" data-icon="chev"></span></button>
+        <button class="qa" id="qaPending"><span data-icon="clock"></span><span id="qaPendingText">Pending Orders</span><span class="chev" data-icon="chev"></span></button>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="ic-red" data-icon="file"></span><h3>Recent Orders</h3><button class="link" data-go="orders">View All →</button></div>
+        <div id="recent"></div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="page" id="page-orders">
+      <div class="page-title"><span class="ic-red big" data-icon="file"></span><div><h2>Orders</h2><p>Manage all restaurant orders</p></div></div>
+      <div class="chips" id="statusChips"></div>
+      <div class="search"><span data-icon="search"></span><input id="search" type="search" placeholder="Search orders, name or phone..." autocomplete="off"></div>
+      <div class="chips small" id="dateChips"></div>
+      <div id="orderList"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="page-title"><span class="ic-red big" data-icon="sliders"></span><div><h2>Settings</h2><p>Account and notifications</p></div></div>
+      <div class="card" id="accountCard"></div>
+      <div class="card" id="notifCard"></div>
+      <div class="card hidden" id="installCard"></div>
+      <button class="btn ghost" id="logoutBtn" type="button"><span data-icon="logout"></span> Logout</button>
+      <p class="muted center small">Avalon.pk Owner Panel v1.0</p>
+    </section>
+  </main>
+
+  <nav class="bottom">
+    <button data-tab="home" class="on"><span data-icon="home"></span>Home</button>
+    <button data-tab="orders"><span data-icon="file"></span>Orders</button>
+    <button data-tab="settings"><span data-icon="sliders"></span>Settings</button>
+  </nav>
+</div>
+
+<!-- Order sheet -->
+<div id="scrim" class="scrim"></div>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true"></div>
+
+<!-- Success -->
+<div id="success" class="success hidden"></div>
+
+<div id="toast" class="toast"></div>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
