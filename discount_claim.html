@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Claim Your Discount</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#e8213b;
+    --red-deep:#b3122a;
+    --cyan:#1fd3e8;
+    --bg:#0a0a0a;
+    --field:#101012;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    min-height:100vh;
+    min-height:100dvh;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(232,33,59,0.14), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgba(31,211,232,0.10), transparent 55%),
+      radial-gradient(ellipse at 0% 100%, rgba(232,33,59,0.10), transparent 50%),
+      var(--bg);
+    color:#fff;
+    font-family:"Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:max(24px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom));
+    position:relative;
+    overflow-x:hidden;
+  }
+  /* Optional background photo: set BG_IMAGE in the script below */
+  .bg-photo{position:fixed;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .6s ease;z-index:0;}
+  .bg-photo.on{opacity:.55;}
+  .bg-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.55),rgba(10,10,10,.85));}
+
+  /* Decorations */
+  .deco{position:fixed;pointer-events:none;z-index:0;}
+  .stroke-red{top:0;left:0;width:34vw;max-width:170px;}
+  .stroke-cyan{top:0;right:0;width:30vw;max-width:150px;}
+  .icon-burger{left:6%;top:26%;width:96px;opacity:.13;transform:rotate(-12deg);}
+  .icon-fries{right:6%;top:25%;width:84px;opacity:.13;transform:rotate(12deg);}
+  @media (max-width:420px){
+    .icon-burger{width:68px;left:3%;}
+    .icon-fries{width:60px;right:3%;}
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:420px;
+    text-align:center;
+  }
+
+  /* Brand (restaurant name replaces logo) */
+  .brand{
+    min-height:112px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:34px;
+  }
+  .brand-name{
+    font-size:clamp(34px,11vw,52px);
+    font-weight:800;
+    font-style:italic;
+    line-height:1.05;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#fff;
+    text-shadow:-2px 0 var(--red), 2px 0 var(--cyan);
+    word-break:break-word;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .brand-name.on{opacity:1;transform:none;}
+  .brand-skel{
+    width:58%;height:34px;border-radius:10px;
+    background:linear-gradient(90deg,#161616,#222,#161616);
+    background-size:200% 100%;
+    animation:shimmer 1.2s linear infinite;
+  }
+  @keyframes shimmer{to{background-position:-200% 0;}}
+
+  h1{
+    font-size:clamp(21px,6.2vw,26px);
+    line-height:1.4;
+    font-weight:700;
+    margin-bottom:22px;
+  }
+  h1 span{color:var(--red);}
+
+  .divider{
+    display:flex;justify-content:center;margin:0 auto 34px;
+  }
+  .divider i{display:block;width:40px;height:4px;}
+  .divider i:first-child{background:var(--red);border-radius:2px 0 0 2px;}
+  .divider i:last-child{background:var(--cyan);border-radius:0 2px 2px 0;}
+
+  /* CTA */
+  .cta-wrap{
+    margin:6px auto 0;
+    width:min(100%,360px);
+    padding:5px;
+    border-radius:40px;
+    background:linear-gradient(90deg,rgba(232,33,59,.5),rgba(31,211,232,.55));
+    box-shadow:0 0 26px rgba(232,33,59,.35),0 0 30px rgba(31,211,232,.20);
+  }
+  .claim-btn{
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;height:62px;
+    border:none;border-radius:34px;
+    background:linear-gradient(180deg,#f2263f 0%,var(--red-deep) 100%);
+    color:#fff;
+    font:700 clamp(17px,5vw,20px) "Poppins",sans-serif;
+    cursor:pointer;
+    transition:transform .15s ease, filter .2s ease, opacity .2s ease;
+  }
+  .claim-btn .label{margin-right:46px;white-space:nowrap;}
+  .claim-btn .arrow{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    width:46px;height:46px;border-radius:50%;
+    background:rgba(40,0,8,.78);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .claim-btn .arrow svg{width:22px;height:22px;}
+  .claim-btn:active:not(:disabled){transform:scale(.98);}
+  .claim-btn:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.6);}
+
+  .msg{
+    min-height:22px;margin-top:16px;
+    font-size:13px;line-height:1.5;color:#9a9aa0;
+  }
+  .msg.err{color:#ff6b7e;}
+
+  @media (max-height:640px){
+    .brand{min-height:80px;margin-bottom:20px;}
+    .divider{margin-bottom:22px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+  <div class="bg-photo" id="bgPhoto"></div>
+
+  <!-- Brush strokes -->
+  <svg class="deco stroke-red" viewBox="0 0 170 150" aria-hidden="true">
+    <polygon fill="#e8213b" points="0,0 120,0 112,6 96,8 100,14 74,26 78,30 52,48 56,52 30,74 20,72 10,96 0,110"/>
+    <polygon fill="#e8213b" points="128,0 150,0 134,12 142,14 120,30 118,22 126,16"/>
+    <polygon fill="#e8213b" opacity=".75" points="44,2 60,0 52,16 40,26 46,10"/>
+    <polygon fill="#e8213b" opacity=".6" points="0,128 12,118 8,134 0,146"/>
+  </svg>
+  <svg class="deco stroke-cyan" viewBox="0 0 150 130" aria-hidden="true">
+    <polygon fill="#1fd3e8" points="150,0 150,86 140,70 142,56 126,50 130,40 112,34 114,26 96,22 100,12 86,10 90,0"/>
+    <polygon fill="#1fd3e8" opacity=".8" points="76,0 84,0 70,16 62,22 66,10"/>
+    <polygon fill="#1fd3e8" opacity=".6" points="46,40 62,34 54,46 40,52"/>
+  </svg>
+
+  <!-- Faint food outlines -->
+  <svg class="deco icon-burger" viewBox="0 0 120 100" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 44c0-20 20-32 48-32s48 12 48 32z"/>
+    <path d="M42 24h.01M60 20h.01M78 24h.01M52 32h.01M70 32h.01" stroke-width="4"/>
+    <path d="M8 52c8 8 14-8 22 0s14-8 22 0 14-8 22 0 14-8 22 0 10-4 14-2"/>
+    <path d="M14 60h92c4 0 6 3 6 6s-2 6-6 6H14c-4 0-6-3-6-6s2-6 6-6z"/>
+    <path d="M12 80h96v2c0 8-6 14-14 14H26c-8 0-14-6-14-14z"/>
+  </svg>
+  <svg class="deco icon-fries" viewBox="0 0 100 120" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M26 46L18 8l12-2 8 38M40 44l-2-40h13l4 40M56 44l8-38 12 3-10 36M70 46l16-30 9 7-20 28"/>
+    <path d="M14 48h76l-10 66H26z"/>
+    <path d="M22 70h60"/>
+  </svg>
+
+  <main class="wrap">
+    <div class="brand" id="brand" aria-live="polite">
+      <div class="brand-skel" id="brandSkel"></div>
+      <div class="brand-name" id="brandName" hidden></div>
+    </div>
+
+    <h1>To claim your <span id="pct">10% discount</span>,<br>tap below to message us on WhatsApp.</h1>
+    <div class="divider"><i></i><i></i></div>
+
+    <form id="claimForm" novalidate>
+      <div class="cta-wrap">
+        <button class="claim-btn" id="claimBtn" type="submit" disabled>
+          <span class="label">Click Here to Claim</span>
+          <span class="arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <p class="msg" id="msg">Loading…</p>
+  </main>
+
+<script>
+(function(){
+  // ====== SETTINGS ======
+  var CONFIG = {
+    // Flow_D_multi menu API URL (same one menu-multi.html uses). It must return restaurant {id, name, phone}.
+    API_URL: "PASTE_FLOW_D_MULTI_URL_HERE",
+    DEFAULT_RID: "dope",          // QR without ?r= keeps working for the first client
+    DISCOUNT_PERCENT: 10,         // same for every client; change this one number to change the offer
+    // The word "discount" must stay in this text: the bot (Is_Discount_Message) triggers on it.
+    MESSAGE: "Hi! I'd like to claim my {pct}% discount 🎉",
+    BG_IMAGE: ""                  // optional: e.g. "assets/discount-bg.jpg"
+  };
+  // ======================
+
+  var $ = function(id){ return document.getElementById(id); };
+  var form = $("claimForm"), btn = $("claimBtn"),
+      msg = $("msg"), brandName = $("brandName"), brandSkel = $("brandSkel");
+
+  var rid = (new URLSearchParams(location.search).get("r") || CONFIG.DEFAULT_RID).toLowerCase().trim();
+  var restaurant = null;
+
+  if (CONFIG.BG_IMAGE) {
+    var bg = $("bgPhoto");
+    bg.style.backgroundImage = "url('" + CONFIG.BG_IMAGE + "')";
+    bg.classList.add("on");
+  }
+
+  function setMsg(text, isErr){ msg.textContent = text || ""; msg.className = "msg" + (isErr ? " err" : ""); }
+  function digits(s){ return String(s || "").replace(/\D/g, ""); }
+
+  function fail(text){
+    brandSkel.hidden = true;
+    brandName.hidden = false;
+    brandName.textContent = "Sorry";
+    requestAnimationFrame(function(){ brandName.classList.add("on"); });
+    btn.disabled = true;
+    setMsg(text, true);
+  }
+
+  function ready(r){
+    restaurant = r;
+    document.title = "Claim your discount — " + r.name;
+    brandSkel.hidden = true;
+    brandName.hidden = false;
+    brandName.textContent = r.name;
+    requestAnimationFrame(function(){ brandName.classList.add("on"); });
+    restaurant.pct = CONFIG.DISCOUNT_PERCENT;
+    $("pct").textContent = CONFIG.DISCOUNT_PERCENT + "% discount";
+    btn.disabled = false;
+    setMsg("This opens WhatsApp with a message already filled in — just hit send.");
+  }
+
+  function load(){
+    if (!/^[a-z0-9_-]{1,40}$/.test(rid)) { fail("This link is not valid. Please scan the QR code again."); return; }
+    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("PASTE_") === 0) { fail("Page setup is incomplete (API URL missing)."); return; }
+
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, 10000);
+    var url = CONFIG.API_URL + (CONFIG.API_URL.indexOf("?") > -1 ? "&" : "?") + "r=" + encodeURIComponent(rid);
+
+    fetch(url, { signal: ctrl.signal })
+      .then(function(res){ if (!res.ok) throw new Error("http " + res.status); return res.json(); })
+      .then(function(data){
+        clearTimeout(timer);
+        var r = (data && data.restaurant) || data || {};
+        if (r.id && String(r.id).toLowerCase() !== rid) throw new Error("restaurant mismatch");
+        if (r.active === false) { fail("This offer is not available right now."); return; }
+        if (!r.name || digits(r.phone).length < 8) throw new Error("incomplete restaurant info");
+        ready({ id: rid, name: String(r.name), phone: digits(r.phone) });
+      })
+      .catch(function(e){
+        clearTimeout(timer);
+        console.error("discount page load failed:", e);
+        fail("Could not load this offer. Please check your internet and try again.");
+      });
+  }
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    if (!restaurant) return;
+    var text = CONFIG.MESSAGE.replace("{pct}", restaurant.pct);
+    var link = "https://wa.me/" + restaurant.phone + "?text=" + encodeURIComponent(text);
+    window.location.href = link;
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
