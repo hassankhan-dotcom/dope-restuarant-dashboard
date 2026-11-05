@@ -17,6 +17,6 @@ self.VAPID_KEY = "BAXI4sXkvNvv6BZ9mtDUiNi3TFs4snY80SZe3matVpU-KSiLzu1IsYGyGGLy9S
 // While this is null the app shows "rate not set" instead of a cost estimate.
 self.FOLLOWUP_RATE_PKR = null;
 // n8n webhook that sends the template messages. Leave empty until the workflow is ready (Send stays disabled).
-self.FOLLOWUP_WEBHOOK_URL = "";
+self.FOLLOWUP_WEBHOOK_URL = "https://143.110.190.102.sslip.io/webhook/followup-send";
 // A customer who got a follow-up is skipped for this many days.
 self.FOLLOWUP_COOLDOWN_DAYS = 7;
